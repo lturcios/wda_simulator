@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WDA Exam Simulator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-theme">
+    <button class="theme-toggle" id="theme-toggle">🌙 Tema Oscuro</button>
+
+    <div class="container">
+        <div id="start-screen">
+            <h1>🎓 WDA Certification Exam</h1>
+            <p>Simulador de Práctica para la Certificación Web Development Associate</p>
+            <ul>
+                <li><strong>📋 Número de preguntas:</strong> 40</li>
+                <li><strong>⏱️ Límite de tiempo:</strong> 60 minutos</li>
+                <li><strong>✅ Puntuación para pasar:</strong> 75%</li>
+            </ul>
+            <div class="controls">
+                <button id="start-btn">Comenzar Examen</button>
+            </div>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div id="header">
+                <div id="question-counter"></div>
+                <div id="timer">60:00</div>
+            </div>
+            <div id="question-container">
+                <p id="question-text"></p>
+                <div id="answer-buttons" class="btn-grid"></div>
+            </div>
+            <div class="controls">
+                <button id="next-btn" class="hidden">Siguiente Pregunta</button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden">
+            <h2>✅ Examen Finalizado</h2>
+            <p id="score-text"></p>
+            <p id="feedback-text"></p>
+            <div id="summary-container"></div>
+            <div class="controls">
+                <button id="restart-btn">Intentar de Nuevo</button>
+            </div>
+        </div>
+    </div>
+<script src="script.js"></script>
+</body>
+</html>
