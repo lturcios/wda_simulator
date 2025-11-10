@@ -17,11 +17,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedbackTextElement = document.getElementById('feedback-text');
     const summaryContainer = document.getElementById('summary-container');
 
-    let shuffledQuestions, currentQuestionIndex;
+    let currentQuestionIndex;
     let score = 0;
     let timerInterval;
-    const TOTAL_QUESTIONS = 40;
+    const TOTAL_QUESTIONS = 50;
     const EXAM_TIME_SECONDS = 60 * 60; // 60 minutes
+
+    const EXAM_DISTRIBUTION = {
+        html: 13,           // 25% - Module 1: HTML Fundamentals
+        css: 11,            // 22.5% - Module 2: CSS Fundamentals
+        integrate: 13,      // 25% - Module 3: Integrating HTML & CSS
+        responsive: 6,      // 12.5% - Module 4: Responsive Web Design
+        accessibility: 7    // 15% - Module 5: Accessibility & Best Practices
+    };
+    
+    function shuffleArray(array) {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    // Function to generate exam according to distribution
+    function generateExam(allQuestions, distribution) {
+        const examQuestions = [];
+        const questionsByCategory = {};
+
+        // Group questions by category
+        allQuestions.forEach(q => {
+            if (!questionsByCategory[q.category]) {
+                questionsByCategory[q.category] = [];
+            }
+            questionsByCategory[q.category].push(q);
+        });
+
+        // Select questions according to distribution
+        for (const [category, count] of Object.entries(distribution)) {
+            const categoryQuestions = questionsByCategory[category] || [];
+            const shuffled = shuffleArray(categoryQuestions);
+            const selected = shuffled.slice(0, count);
+            examQuestions.push(...selected);
+        }
+
+        // Shuffle the final exam questions
+        return shuffleArray(examQuestions);
+    }
 
     // --- Theme Logic ---
     function loadTheme() {
@@ -52,1940 +94,297 @@ document.addEventListener('DOMContentLoaded', () => {
     themeToggleButton.addEventListener('click', toggleTheme);
 
     const allQuestions = [
-    // ----------------------
-    // HTML - 70 questions
-    // ----------------------
-    {
-        question: "Which HTML tag defines a paragraph?",
-        answers: [
-        { text: "<p>", correct: true },
-        { text: "<para>", correct: false },
-        { text: "<paragraph>", correct: false },
-        { text: "<text>", correct: false }
-        ]
-    },
-    {
-        question: "Which HTML element is used to create a hyperlink?",
-        answers: [
-        { text: "<a>", correct: true },
-        { text: "<link>", correct: false },
-        { text: "<href>", correct: false },
-        { text: "<url>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute is required for the <img> tag for it to display an image?",
-        answers: [
-        { text: "src", correct: true },
-        { text: "href", correct: false },
-        { text: "alt", correct: false },
-        { text: "title", correct: false }
-        ]
-    },
-    {
-        question: "What is the purpose of the `alt` attribute in an `<img>` tag?",
-        answers: [
-        { text: "Provide alternative text for accessibility and when the image cannot load.", correct: true },
-        { text: "Set the image URL.", correct: false },
-        { text: "Set the image title tooltip.", correct: false },
-        { text: "Define image dimensions.", correct: false }
-        ]
-    },
-    {
-        question: "Which element is used to define the most important heading?",
-        answers: [
-        { text: "<h1>", correct: true },
-        { text: "<h6>", correct: false },
-        { text: "<header>", correct: false },
-        { text: "<heading>", correct: false }
-        ]
-    },
-    {
-        question: "Which element is semantic for page navigation links?",
-        answers: [
-        { text: "`<nav>`", correct: true },
-        { text: "<navigation>", correct: false },
-        { text: "<menu>", correct: false },
-        { text: "<links>", correct: false }
-        ]
-    },
-    {
-        question: "How do you create an unordered list in HTML?",
-        answers: [
-        { text: "<ul>", correct: true },
-        { text: "<ol>", correct: false },
-        { text: "<list>", correct: false },
-        { text: "<li>", correct: false }
-        ]
-    },
-    {
-        question: "Which tag creates a list item inside a list?",
-        answers: [
-        { text: "<li>", correct: true },
-        { text: "<item>", correct: false },
-        { text: "<listitem>", correct: false },
-        { text: "<ulitem>", correct: false }
-        ]
-    },
-    {
-        question: "Which element contains metadata and links to scripts/styles and the document title?",
-        answers: [
-        { text: "<head>", correct: true },
-        { text: "<header>", correct: false },
-        { text: "<meta>", correct: false },
-        { text: "<body>", correct: false }
-        ]
-    },
-    {
-        question: "What does the `<title>` element specify?",
-        answers: [
-        { text: "The document title shown in the browser tab.", correct: true },
-        { text: "The main heading on the page.", correct: false },
-        { text: "SEO keywords.", correct: false },
-        { text: "The page's meta description.", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute of the `<a>` tag opens the link in a new tab or window?",
-        answers: [
-        { text: "target=\"_blank\"", correct: true },
-        { text: "href=\"_blank\"", correct: false },
-        { text: "rel=\"new\"", correct: false },
-        { text: "open=\"new\"", correct: false }
-        ]
-    },
-    {
-        question: "Which element represents the main content of the document that is unique to that page?",
-        answers: [
-        { text: "`<main>`", correct: true },
-        { text: "<section>", correct: false },
-        { text: "<div>", correct: false },
-        { text: "<article>", correct: false }
-        ]
-    },
-    {
-        question: "Which semantic element represents independent, self-contained content?",
-        answers: [
-        { text: "<article>", correct: true },
-        { text: "<section>", correct: false },
-        { text: "<aside>", correct: false },
-        { text: "<div>", correct: false }
-        ]
-    },
-    {
-        question: "True or false: The `<footer>` element is used to represent the footer for its nearest sectioning content or sectioning root.",
-        answers: [
-        { text: "True", correct: true },
-        { text: "False", correct: false },
-        { text: "Sometimes", correct: false },
-        { text: "Only for pages", correct: false }
-        ]
-    },
-    {
-        question: "Which tag is used to define a table row?",
-        answers: [
-        { text: "<tr>", correct: true },
-        { text: "<td>", correct: false },
-        { text: "<th>", correct: false },
-        { text: "<table-row>", correct: false }
-        ]
-    },
-    {
-        question: "Which HTML tag defines a table header cell?",
-        answers: [
-        { text: "<th>", correct: true },
-        { text: "<td>", correct: false },
-        { text: "<thead>", correct: false },
-        { text: "<header>", correct: false }
-        ]
-    },
-    {
-        question: "Which element should you use to include an external JavaScript file?",
-        answers: [
-        { text: "<script src=\"app.js\"></script>", correct: true },
-        { text: "<script href=\"app.js\"></script>", correct: false },
-        { text: "<javascript src=\"app.js\">", correct: false },
-        { text: "<link rel=\"script\" href=\"app.js\">", correct: false }
-        ]
-    },
-    {
-        question: "Which element provides a way to show preformatted text where whitespace is preserved?",
-        answers: [
-        { text: "<pre>", correct: true },
-        { text: "<code>", correct: false },
-        { text: "<samp>", correct: false },
-        { text: "<kbd>", correct: false }
-        ]
-    },
-    {
-        question: "Which tag is used for marking up computer code within a document?",
-        answers: [
-        { text: "<code>", correct: true },
-        { text: "<program>", correct: false },
-        { text: "<script>", correct: false },
-        { text: "<pre>", correct: false }
-        ]
-    },
-    {
-        question: "What is the purpose of the `<label>` element?",
-        answers: [
-        { text: "Associate text with a form control for better accessibility.", correct: true },
-        { text: "Label an image.", correct: false },
-        { text: "Name a section.", correct: false },
-        { text: "Add a tooltip.", correct: false }
-        ]
-    },
-    {
-        question: "Which input type creates a color picker in supporting browsers?",
-        answers: [
-        { text: "type=\"color\"", correct: true },
-        { text: "type=\"picker\"", correct: false },
-        { text: "type=\"colorpicker\"", correct: false },
-        { text: "type=\"palette\"", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute makes a form input required by the browser?",
-        answers: [
-        { text: "required", correct: true },
-        { text: "validate", correct: false },
-        { text: "mandatory", correct: false },
-        { text: "must", correct: false }
-        ]
-    },
-    {
-        question: "What does the `<fieldset>` element do?",
-        answers: [
-        { text: "Groups related form controls and labels.", correct: true },
-        { text: "Creates a new form.", correct: false },
-        { text: "Defines a data field.", correct: false },
-        { text: "Groups scripts.", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute of `<script>` tells the browser to execute the script after the document has been parsed?",
-        answers: [
-        { text: "defer", correct: true },
-        { text: "async", correct: false },
-        { text: "delay", correct: false },
-        { text: "later", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute of `<script>` downloads and executes the script asynchronously (without blocking HTML parsing)?",
-        answers: [
-        { text: "async", correct: true },
-        { text: "defer", correct: false },
-        { text: "parallel", correct: false },
-        { text: "now", correct: false }
-        ]
-    },
-    {
-        question: "Which HTML5 element is used for content tangentially related to the main content (often a sidebar)?",
-        answers: [
-        { text: "`<aside>`", correct: true },
-        { text: "<side>", correct: false },
-        { text: "<sidebar>", correct: false },
-        { text: "<menu>", correct: false }
-        ]
-    },
-    {
-        question: "How do you add a comment in HTML?",
-        answers: [
-        { text: "<!-- This is a comment -->", correct: true },
-        { text: "// This is a comment", correct: false },
-        { text: "/* This is a comment */", correct: false },
-        { text: "# This is a comment", correct: false }
-        ]
-    },
-    {
-        question: "Which element is recommended to embed short inline quotations?",
-        answers: [
-        { text: "<q>", correct: true },
-        { text: "<blockquote>", correct: false },
-        { text: "<cite>", correct: false },
-        { text: "<quote>", correct: false }
-        ]
-    },
-    {
-        question: "Which element is intended for longer, block-level quotations?",
-        answers: [
-        { text: "<blockquote>", correct: true },
-        { text: "<q>", correct: false },
-        { text: "<cite>", correct: false },
-        { text: "<quote>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute on `<a>` mitigates security/privacy concerns when using target=\"_blank\"?",
-        answers: [
-        { text: "rel=\"noopener noreferrer\"", correct: true },
-        { text: "safe=\"true\"", correct: false },
-        { text: "secure=\"true\"", correct: false },
-        { text: "rel=\"nofollow\"", correct: false }
-        ]
-    },
-    {
-        question: "Which element provides a semantic container for a navigation list of links?",
-        answers: [
-        { text: "`<nav>`", correct: true },
-        { text: "<menu>", correct: false },
-        { text: "<list>", correct: false },
-        { text: "<links>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute on `<input>` sets a maximum allowed value for numeric input?",
-        answers: [
-        { text: "max", correct: true },
-        { text: "maxlength", correct: false },
-        { text: "limit", correct: false },
-        { text: "maximum", correct: false }
-        ]
-    },
-    {
-        question: "What does the `<progress>` element represent?",
-        answers: [
-        { text: "Completion progress of a task.", correct: true },
-        { text: "An animated spinner.", correct: false },
-        { text: "A status message.", correct: false },
-        { text: "A timeline.", correct: false }
-        ]
-    },
-    {
-        question: "Which element is best to use for marking up keyboard input from the user?",
-        answers: [
-        { text: "<kbd>", correct: true },
-        { text: "<code>", correct: false },
-        { text: "<samp>", correct: false },
-        { text: "<var>", correct: false }
-        ]
-    },
-    {
-        question: "Which element marks up sample output from a program or system?",
-        answers: [
-        { text: "<samp>", correct: true },
-        { text: "<code>", correct: false },
-        { text: "<pre>", correct: false },
-        { text: "<output>", correct: false }
-        ]
-    },
-    {
-        question: "Which element represents the result of a calculation or user action in HTML5?",
-        answers: [
-        { text: "<output>", correct: true },
-        { text: "<result>", correct: false },
-        { text: "<calc>", correct: false },
-        { text: "<value>", correct: false }
-        ]
-    },
-    {
-        question: "Which element embeds another HTML document inside the current one?",
-        answers: [
-        { text: "<iframe>", correct: true },
-        { text: "<embed>", correct: false },
-        { text: "<frame>", correct: false },
-        { text: "<object>", correct: false }
-        ]
-    },
-    {
-        question: "Which element is used to group and label a set of options for forms?",
-        answers: [
-        { text: "<optgroup>", correct: true },
-        { text: "<optionset>", correct: false },
-        { text: "<group>", correct: false },
-        { text: "<selectgroup>", correct: false }
-        ]
-    },
-    {
-        question: "What is the default display type of the `<span>` element?",
-        answers: [
-        { text: "inline", correct: true },
-        { text: "block", correct: false },
-        { text: "inline-block", correct: false },
-        { text: "flex", correct: false }
-        ]
-    },
-    {
-        question: "What is the default display type of the `<div>` element?",
-        answers: [
-        { text: "block", correct: true },
-        { text: "inline", correct: false },
-        { text: "inline-block", correct: false },
-        { text: "flex", correct: false }
-        ]
-    },
-    {
-        question: "Which element should be used for the site header content?",
-        answers: [
-        { text: "<header>", correct: true },
-        { text: "<head>", correct: false },
-        { text: "<top>", correct: false },
-        { text: "<nav>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute on `<form>` defines the HTTP method used when submitting the form?",
-        answers: [
-        { text: "method", correct: true },
-        { text: "action", correct: false },
-        { text: "type", correct: false },
-        { text: "submit", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute on `<form>` defines the URL where form data is sent?",
-        answers: [
-        { text: "action", correct: true },
-        { text: "method", correct: false },
-        { text: "endpoint", correct: false },
-        { text: "href", correct: false }
-        ]
-    },
-    {
-        question: "Which HTTP method is typically used to retrieve data without side effects?",
-        answers: [
-        { text: "GET", correct: true },
-        { text: "POST", correct: false },
-        { text: "PUT", correct: false },
-        { text: "DELETE", correct: false }
-        ]
-    },
-    {
-        question: "Which element is used to embed audio content with playback controls?",
-        answers: [
-        { text: "<audio controls>", correct: true },
-        { text: "<sound controls>", correct: false },
-        { text: "<music controls>", correct: false },
-        { text: "<player controls>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute allows the browser to preload video or audio resources?",
-        answers: [
-        { text: "preload", correct: true },
-        { text: "prefetch", correct: false },
-        { text: "autopreload", correct: false },
-        { text: "buffer", correct: false }
-        ]
-    },
-    {
-        question: "Which element defines an option in a drop-down list?",
-        answers: [
-        { text: "<option>", correct: true },
-        { text: "<choice>", correct: false },
-        { text: "<select-option>", correct: false },
-        { text: "<item>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute on `<input>` allows selecting multiple files?",
-        answers: [
-        { text: "multiple", correct: true },
-        { text: "multifile", correct: false },
-        { text: "files", correct: false },
-        { text: "many", correct: false }
-        ]
-    },
-    {
-        question: "What does the `charset` meta tag usually define?",
-        answers: [
-        { text: "Character encoding (e.g., UTF-8).", correct: true },
-        { text: "Language of the page.", correct: false },
-        { text: "Viewport settings.", correct: false },
-        { text: "SEO keywords.", correct: false }
-        ]
-    },
-    {
-        question: "Which tag is needed to make a page responsive on mobile devices via viewport?",
-        answers: [
-        { text: "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">", correct: true },
-        { text: "<meta name=\"mobile\" content=\"true\">", correct: false },
-        { text: "<meta viewport>", correct: false },
-        { text: "<meta responsive>", correct: false }
-        ]
-    },
-    {
-        question: "Which element is appropriate to mark up a site logo or branding within the header?",
-        answers: [
-        { text: "<figure> with <img> and <figcaption> if caption is needed", correct: true },
-        { text: "<brand>", correct: false },
-        { text: "<logo>", correct: false },
-        { text: "<icon>", correct: false }
-        ]
-    },
-    {
-        question: "Which element should contain the navigation landmark for screen readers?",
-        answers: [
-        { text: "<nav>", correct: true },
-        { text: "<div>", correct: false },
-        { text: "<ul>", correct: false },
-        { text: "<menu>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute on `<a>` is used to provide the link URL?",
-        answers: [
-        { text: "href", correct: true },
-        { text: "src", correct: false },
-        { text: "link", correct: false },
-        { text: "data-href", correct: false }
-        ]
-    },
-    {
-        question: "Which element is commonly used to embed SVG vector images inline?",
-        answers: [
-        { text: "<svg>", correct: true },
-        { text: "<vector>", correct: false },
-        { text: "<graphic>", correct: false },
-        { text: "<image>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute makes a link indicate that it is an external resource and should be ignored by search engines?",
-        answers: [
-        { text: "rel=\"nofollow\"", correct: true },
-        { text: "rel=\"external\"", correct: false },
-        { text: "target=\"_external\"", correct: false },
-        { text: "href-rel=\"nofollow\"", correct: false }
-        ]
-    },
-    {
-        question: "Which element is used to provide a caption for a `<figure>`?",
-        answers: [
-        { text: "<figcaption>", correct: true },
-        { text: "<caption>", correct: false },
-        { text: "<label>", correct: false },
-        { text: "<legend>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute can be used on `<script>` to specify the script's MIME type (rarely needed now)?",
-        answers: [
-        { text: "type", correct: true },
-        { text: "mime", correct: false },
-        { text: "lang", correct: false },
-        { text: "format", correct: false }
-        ]
-    },
-    {
-        question: "Which element should be used to denote strongly emphasized text with importance?",
-        answers: [
-        { text: "<strong>", correct: true },
-        { text: "<b>", correct: false },
-        { text: "<em>", correct: false },
-        { text: "<big>", correct: false }
-        ]
-    },
-    {
-        question: "Which element is used to represent emphasized text (stress emphasis)?",
-        answers: [
-        { text: "<em>", correct: true },
-        { text: "<i>", correct: false },
-        { text: "<strong>", correct: false },
-        { text: "<mark>", correct: false }
-        ]
-    },
-    {
-        question: "Which element is preferred for marking up highlighted text?",
-        answers: [
-        { text: "<mark>", correct: true },
-        { text: "<highlight>", correct: false },
-        { text: "<strong>", correct: false },
-        { text: "<b>", correct: false }
-        ]
-    },
-    {
-        question: "Which element defines a client-side image map?",
-        answers: [
-        { text: "<map>", correct: true },
-        { text: "<area>", correct: false },
-        { text: "<imagemap>", correct: false },
-        { text: "<coords>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute on `<img>` improves accessibility and SEO by giving a textual description?",
-        answers: [
-        { text: "alt", correct: true },
-        { text: "desc", correct: false },
-        { text: "title", correct: false },
-        { text: "caption", correct: false }
-        ]
-    },
-    {
-        question: "Which input type is used for numeric input with arrows in many browsers?",
-        answers: [
-        { text: "type=\"number\"", correct: true },
-        { text: "type=\"numeric\"", correct: false },
-        { text: "type=\"range\"", correct: false },
-        { text: "type=\"spin\"", correct: false }
-        ]
-    },
-    {
-        question: "Which element is used to define the base URL for relative URLs on a page?",
-        answers: [
-        { text: "<base href=\"https://example.com/\">", correct: true },
-        { text: "<baseurl>", correct: false },
-        { text: "<basepath>", correct: false },
-        { text: "<root>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute on `<a>` adds a tooltip when hovering over the link?",
-        answers: [
-        { text: "title", correct: true },
-        { text: "alt", correct: false },
-        { text: "tooltip", correct: false },
-        { text: "hint", correct: false }
-        ]
-    },
-    {
-        question: "Which HTML element is used to display a scalar measurement within a known range (eg. battery level)?",
-        answers: [
-        { text: "<meter>", correct: true },
-        { text: "<progress>", correct: false },
-        { text: "<gauge>", correct: false },
-        { text: "<range>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute makes an `<input>` field read-only?",
-        answers: [
-        { text: "readonly", correct: true },
-        { text: "disabled", correct: false },
-        { text: "lock", correct: false },
-        { text: "fixed", correct: false }
-        ]
-    },
-    {
-        question: "Which element is used for the document's visible content?",
-        answers: [
-        { text: "<body>", correct: true },
-        { text: "<content>", correct: false },
-        { text: "<document>", correct: false },
-        { text: "<page>", correct: false }
-        ]
-    },
-    {
-        question: "What is the correct way to declare the language of an HTML document (example for English)?",
-        answers: [
-        { text: "<html lang=\"en\">", correct: true },
-        { text: "<html language=\"english\">", correct: false },
-        { text: "<html lang=\"eng\">", correct: false },
-        { text: "<html code=\"en\">", correct: false }
-        ]
-    },
-    {
-        question: "Which HTML element is used to provide a set of radio buttons grouped logically?",
-        answers: [
-        { text: "Use multiple <input type=\"radio\"> with the same name attribute", correct: true },
-        { text: "<radiogroup>", correct: false },
-        { text: "<group>", correct: false },
-        { text: "<multiradio>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute on `<input>` defines a placeholder text shown when the field is empty?",
-        answers: [
-        { text: "placeholder", correct: true },
-        { text: "title", correct: false },
-        { text: "hint", correct: false },
-        { text: "value", correct: false }
-        ]
-    },
-    {
-        question: "Which HTML element allows embedding third-party widgets and plugins?",
-        answers: [
-        { text: "<embed>", correct: true },
-        { text: "<plugin>", correct: false },
-        { text: "<object>", correct: false },
-        { text: "<iframe>", correct: false }
-        ]
-    },
-    {
-        question: "Which element groups the visible controls in a form and can include a legend?",
-        answers: [
-        { text: "<fieldset>", correct: true },
-        { text: "<group>", correct: false },
-        { text: "<controls>", correct: false },
-        { text: "<formgroup>", correct: false }
-        ]
-    },
-    {
-        question: "Which attribute is used to indicate alternative text for the `<area>` element in image maps?",
-        answers: [
-        { text: "alt", correct: true },
-        { text: "title", correct: false },
-        { text: "desc", correct: false },
-        { text: "label", correct: false }
-        ]
-    },
-
-    // ----------------------
-    // CSS - 65 questions
-    // ----------------------
-    {
-        question: "What does CSS stand for?",
-        answers: [
-        { text: "Cascading Style Sheets", correct: true },
-        { text: "Creative Style Sheets", correct: false },
-        { text: "Computer Style Sheets", correct: false },
-        { text: "Colorful Style Sheets", correct: false }
-        ]
-    },
-    {
-        question: "How do you select an element with id=\"header\" in CSS?",
-        answers: [
-        { text: "#header", correct: true },
-        { text: ".header", correct: false },
-        { text: "header", correct: false },
-        { text: "*header", correct: false }
-        ]
-    },
-    {
-        question: "How do you select all <p> elements that are direct children of a <div>?",
-        answers: [
-        { text: "div > p", correct: true },
-        { text: "div p", correct: false },
-        { text: "div + p", correct: false },
-        { text: "div ~ p", correct: false }
-        ]
-    },
-    {
-        question: "Which property changes the text color of an element?",
-        answers: [
-        { text: "color", correct: true },
-        { text: "font-color", correct: false },
-        { text: "text-color", correct: false },
-        { text: "foreground", correct: false }
-        ]
-    },
-    {
-        question: "Which property controls the space inside an element between its border and content?",
-        answers: [
-        { text: "padding", correct: true },
-        { text: "margin", correct: false },
-        { text: "border", correct: false },
-        { text: "gap", correct: false }
-        ]
-    },
-    {
-        question: "Which property controls the space outside an element, between the border and other elements?",
-        answers: [
-        { text: "margin", correct: true },
-        { text: "padding", correct: false },
-        { text: "border-spacing", correct: false },
-        { text: "gap", correct: false }
-        ]
-    },
-    {
-        question: "What is the CSS box model order from inside out?",
-        answers: [
-        { text: "content → padding → border → margin", correct: true },
-        { text: "margin → border → padding → content", correct: false },
-        { text: "padding → border → content → margin", correct: false },
-        { text: "content → border → padding → margin", correct: false }
-        ]
-    },
-    {
-        question: "Which property makes an element a flex container?",
-        answers: [
-        { text: "display: flex;", correct: true },
-        { text: "display: block;", correct: false },
-        { text: "display: grid;", correct: false },
-        { text: "position: flex;", correct: false }
-        ]
-    },
-    {
-        question: "What does `justify-content: center;` do in a flex container?",
-        answers: [
-        { text: "Aligns flex items along the main axis to the center.", correct: true },
-        { text: "Aligns items along the cross axis.", correct: false },
-        { text: "Centers text inside an element.", correct: false },
-        { text: "Centers the container itself.", correct: false }
-        ]
-    },
-    {
-        question: "What does `align-items: center;` do in a flex container?",
-        answers: [
-        { text: "Aligns flex items along the cross axis to the center.", correct: true },
-        { text: "Aligns items along the main axis.", correct: false },
-        { text: "Sets the vertical-align property.", correct: false },
-        { text: "Centers text inside each item.", correct: false }
-        ]
-    },
-    {
-        question: "Which property sets how elements wrap inside a flex container?",
-        answers: [
-        { text: "flex-wrap", correct: true },
-        { text: "wrap", correct: false },
-        { text: "flex-flow", correct: false },
-        { text: "flex-direction", correct: false }
-        ]
-    },
-    {
-        question: "Which property controls the stacking order of positioned elements?",
-        answers: [
-        { text: "z-index", correct: true },
-        { text: "stack", correct: false },
-        { text: "order", correct: false },
-        { text: "elevation", correct: false }
-        ]
-    },
-    {
-        question: "What does `box-sizing: border-box;` change about element sizing?",
-        answers: [
-        { text: "Includes padding and border in element's width and height.", correct: true },
-        { text: "Excludes border from width calculation.", correct: false },
-        { text: "Removes margin from size calculation.", correct: false },
-        { text: "Makes element invisible.", correct: false }
-        ]
-    },
-    {
-        question: "Which unit is relative to the font-size of the parent element?",
-        answers: [
-        { text: "em", correct: true },
-        { text: "px", correct: false },
-        { text: "cm", correct: false },
-        { text: "%", correct: false }
-        ]
-    },
-    {
-        question: "Which unit is relative to the root element font size?",
-        answers: [
-        { text: "rem", correct: true },
-        { text: "em", correct: false },
-        { text: "vh", correct: false },
-        { text: "vw", correct: false }
-        ]
-    },
-    {
-        question: "Which property creates rounded corners?",
-        answers: [
-        { text: "border-radius", correct: true },
-        { text: "corner-radius", correct: false },
-        { text: "round-corners", correct: false },
-        { text: "radius", correct: false }
-        ]
-    },
-    {
-        question: "Which property adds a drop shadow to an element's box?",
-        answers: [
-        { text: "box-shadow", correct: true },
-        { text: "shadow", correct: false },
-        { text: "text-shadow", correct: false },
-        { text: "drop-shadow", correct: false }
-        ]
-    },
-    {
-        question: "Which property adds shadow to text?",
-        answers: [
-        { text: "text-shadow", correct: true },
-        { text: "font-shadow", correct: false },
-        { text: "shadow-text", correct: false },
-        { text: "text-outline", correct: false }
-        ]
-    },
-    {
-        question: "How do you hide an element while keeping it accessible to screen readers?",
-        answers: [
-        { text: "Use position and large negative offset or clip technique (e.g., position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;)", correct: true },
-        { text: "display: none;", correct: false },
-        { text: "visibility: hidden;", correct: false },
-        { text: "opacity: 0;", correct: false }
-        ]
-    },
-    {
-        question: "Which CSS property changes the font family of an element?",
-        answers: [
-        { text: "font-family", correct: true },
-        { text: "font", correct: false },
-        { text: "typeface", correct: false },
-        { text: "font-name", correct: false }
-        ]
-    },
-    {
-        question: "Which property sets the font size of text?",
-        answers: [
-        { text: "font-size", correct: true },
-        { text: "text-size", correct: false },
-        { text: "size", correct: false },
-        { text: "font-height", correct: false }
-        ]
-    },
-    {
-        question: "Which property controls the transparency of an element?",
-        answers: [
-        { text: "opacity", correct: true },
-        { text: "transparent", correct: false },
-        { text: "visibility", correct: false },
-        { text: "alpha", correct: false }
-        ]
-    },
-    {
-        question: "Which property hides an element and removes it from the layout flow?",
-        answers: [
-        { text: "display: none;", correct: true },
-        { text: "visibility: hidden;", correct: false },
-        { text: "opacity: 0;", correct: false },
-        { text: "position: absolute;", correct: false }
-        ]
-    },
-    {
-        question: "Which property is used to center text inside an element?",
-        answers: [
-        { text: "text-align: center;", correct: true },
-        { text: "align-text: center;", correct: false },
-        { text: "center-text: true;", correct: false },
-        { text: "justify-content: center;", correct: false }
-        ]
-    },
-    {
-        question: "Which pseudo-class is used when the user hovers over an element?",
-        answers: [
-        { text: ":hover", correct: true },
-        { text: ":active", correct: false },
-        { text: ":focus", correct: false },
-        { text: ":visited", correct: false }
-        ]
-    },
-    {
-        question: "Which pseudo-class targets the first child element of its parent?",
-        answers: [
-        { text: ":first-child", correct: true },
-        { text: ":first", correct: false },
-        { text: ":nth-child(1)", correct: false },
-        { text: ":child-first", correct: false }
-        ]
-    },
-    {
-        question: "Which CSS property is used to create transitions between property values?",
-        answers: [
-        { text: "transition", correct: true },
-        { text: "animate", correct: false },
-        { text: "transform", correct: false },
-        { text: "motion", correct: false }
-        ]
-    },
-    {
-        question: "Which property rotates, scales or translates an element in 2D/3D?",
-        answers: [
-        { text: "transform", correct: true },
-        { text: "rotate", correct: false },
-        { text: "translate", correct: false },
-        { text: "position", correct: false }
-        ]
-    },
-    {
-        question: "Which property defines a two-dimensional grid layout?",
-        answers: [
-        { text: "display: grid;", correct: true },
-        { text: "display: flex;", correct: false },
-        { text: "display: table;", correct: false },
-        { text: "display: block;", correct: false }
-        ]
-    },
-    {
-        question: "Which property defines the size of columns in CSS Grid?",
-        answers: [
-        { text: "grid-template-columns", correct: true },
-        { text: "grid-columns", correct: false },
-        { text: "columns", correct: false },
-        { text: "grid-cols", correct: false }
-        ]
-    },
-    {
-        question: "Which property controls the gap between rows and columns in Grid or Flexbox (modern browsers)?",
-        answers: [
-        { text: "gap", correct: true },
-        { text: "grid-gap", correct: false },
-        { text: "gutter", correct: false },
-        { text: "spacing", correct: false }
-        ]
-    },
-    {
-        question: "Which property will collapse adjacent whitespace in inline elements if set to normal (default)?",
-        answers: [
-        { text: "white-space: normal;", correct: true },
-        { text: "text-space: collapse;", correct: false },
-        { text: "space-collapse: true;", correct: false },
-        { text: "whitespace-collapse: normal;", correct: false }
-        ]
-    },
-    {
-        question: "Which property controls whether an element's content can break onto a new line?",
-        answers: [
-        { text: "white-space", correct: true },
-        { text: "line-break", correct: false },
-        { text: "word-wrap", correct: false },
-        { text: "wrap", correct: false }
-        ]
-    },
-    {
-        question: "Which property changes the order of flex items without changing the DOM?",
-        answers: [
-        { text: "order", correct: true },
-        { text: "z-index", correct: false },
-        { text: "flex-order", correct: false },
-        { text: "position", correct: false }
-        ]
-    },
-    {
-        question: "Which value of `display` yields an element that participates in layout as a block and applies flex layout to its children?",
-        answers: [
-        { text: "flex", correct: true },
-        { text: "block", correct: false },
-        { text: "inline-block", correct: false },
-        { text: "inline-flex", correct: false }
-        ]
-    },
-    {
-        question: "Which CSS shorthand property sets font-style, font-variant, font-weight, font-size/line-height and font-family?",
-        answers: [
-        { text: "font", correct: true },
-        { text: "text", correct: false },
-        { text: "type", correct: false },
-        { text: "font-style", correct: false }
-        ]
-    },
-    {
-        question: "Which CSS property is used to control whether an element's background image scrolls with the page or is fixed?",
-        answers: [
-        { text: "background-attachment", correct: true },
-        { text: "background-position", correct: false },
-        { text: "background-repeat", correct: false },
-        { text: "background-origin", correct: false }
-        ]
-    },
-    {
-        question: "Which pseudo-element inserts content before an element's content?",
-        answers: [
-        { text: "::before", correct: true },
-        { text: ":before", correct: false },
-        { text: "::first", correct: false },
-        { text: ":first-child", correct: false }
-        ]
-    },
-    {
-        question: "Which pseudo-element inserts content after an element's content?",
-        answers: [
-        { text: "::after", correct: true },
-        { text: ":after", correct: false },
-        { text: "::last", correct: false },
-        { text: ":last-child", correct: false }
-        ]
-    },
-    {
-        question: "Which property is recommended to create a responsive image that doesn't overflow its container?",
-        answers: [
-        { text: "max-width: 100%; height: auto;", correct: true },
-        { text: "width: 100px; height: auto;", correct: false },
-        { text: "width: auto; height: 100%;", correct: false },
-        { text: "responsive: true;", correct: false }
-        ]
-    },
-
-    // ----------------------
-    // JavaScript - 65 questions
-    // (including 20+ output code questions)
-    // ----------------------
-    {
-        question: "How do you declare a variable that cannot be reassigned in JavaScript?",
-        answers: [
-        { text: "const", correct: true },
-        { text: "let", correct: false },
-        { text: "var", correct: false },
-        { text: "immutable", correct: false }
-        ]
-    },
-    {
-        question: "How do you declare a block-scoped variable that can be reassigned?",
-        answers: [
-        { text: "let", correct: true },
-        { text: "var", correct: false },
-        { text: "const", correct: false },
-        { text: "static", correct: false }
-        ]
-    },
-    {
-        question: "What is the result of `typeof []` in JavaScript?",
-        answers: [
-        { text: "\"object\"", correct: true },
-        { text: "\"array\"", correct: false },
-        { text: "\"list\"", correct: false },
-        { text: "\"object[]\"", correct: false }
-        ]
-    },
-    {
-        question: "Which method converts a JavaScript object into a JSON string?",
-        answers: [
-        { text: "JSON.stringify()", correct: true },
-        { text: "JSON.parse()", correct: false },
-        { text: "toJSON()", correct: false },
-        { text: "stringify()", correct: false }
-        ]
-    },
-    {
-        question: "Which method parses a JSON string into a JavaScript object?",
-        answers: [
-        { text: "JSON.parse()", correct: true },
-        { text: "JSON.stringify()", correct: false },
-        { text: "parseJSON()", correct: false },
-        { text: "eval()", correct: false }
-        ]
-    },
-    {
-        question: "What does `==` do in JavaScript?",
-        answers: [
-        { text: "Performs abstract equality comparison with type coercion.", correct: true },
-        { text: "Performs strict equality comparison without coercion.", correct: false },
-        { text: "Assigns values.", correct: false },
-        { text: "Throws an error.", correct: false }
-        ]
-    },
-    {
-        question: "What does `===` do in JavaScript?",
-        answers: [
-        { text: "Performs strict equality comparison (type and value).", correct: true },
-        { text: "Performs abstract equality (with coercion).", correct: false },
-        { text: "Assigns value and type.", correct: false },
-        { text: "Compares only types.", correct: false }
-        ]
-    },
-    {
-        question: "Which method adds one or more elements to the end of an array?",
-        answers: [
-        { text: "push()", correct: true },
-        { text: "pop()", correct: false },
-        { text: "unshift()", correct: false },
-        { text: "shift()", correct: false }
-        ]
-    },
-    {
-        question: "Which method removes the last element from an array and returns it?",
-        answers: [
-        { text: "pop()", correct: true },
-        { text: "shift()", correct: false },
-        { text: "remove()", correct: false },
-        { text: "delete()", correct: false }
-        ]
-    },
-    {
-        question: "Which method removes the first element of an array and returns it?",
-        answers: [
-        { text: "shift()", correct: true },
-        { text: "pop()", correct: false },
-        { text: "unshift()", correct: false },
-        { text: "splice()", correct: false }
-        ]
-    },
-    {
-        question: "Which method adds elements to the beginning of an array?",
-        answers: [
-        { text: "unshift()", correct: true },
-        { text: "push()", correct: false },
-        { text: "addFirst()", correct: false },
-        { text: "prepend()", correct: false }
-        ]
-    },
-    {
-        question: "What does `Array.map()` return?",
-        answers: [
-        { text: "A new array containing the results of applying a function to every element.", correct: true },
-        { text: "The same array modified in place.", correct: false },
-        { text: "A filtered subset of elements.", correct: false },
-        { text: "Undefined", correct: false }
-        ]
-    },
-    {
-        question: "What does `Array.filter()` return?",
-        answers: [
-        { text: "A new array with elements that pass the test function.", correct: true },
-        { text: "A new array with modified elements.", correct: false },
-        { text: "A boolean indicating whether any element passed the test.", correct: false },
-        { text: "The original array", correct: false }
-        ]
-    },
-    {
-        question: "What does `Array.reduce()` do?",
-        answers: [
-        { text: "Executes a reducer function on each element resulting in a single value.", correct: true },
-        { text: "Removes elements from an array.", correct: false },
-        { text: "Creates a copy of the array.", correct: false },
-        { text: "Finds an element index.", correct: false }
-        ]
-    },
-    {
-        question: "What is hoisting in JavaScript?",
-        answers: [
-        { text: "Behavior where declarations are moved to the top of their scope before execution.", correct: true },
-        { text: "A method to optimize loops.", correct: false },
-        { text: "The process of garbage collection.", correct: false },
-        { text: "A way to import modules.", correct: false }
-        ]
-    },
-    {
-        question: "What type will `typeof null` return?",
-        answers: [
-        { text: "\"object\"", correct: true },
-        { text: "\"null\"", correct: false },
-        { text: "\"undefined\"", correct: false },
-        { text: "\"error\"", correct: false }
-        ]
-    },
-    {
-        question: "Which statement is used to handle exceptions in JavaScript?",
-        answers: [
-        { text: "try...catch", correct: true },
-        { text: "if...else", correct: false },
-        { text: "switch...case", correct: false },
-        { text: "throw...catch", correct: false }
-        ]
-    },
-    {
-        question: "Which keyword is used to create an asynchronous function?",
-        answers: [
-        { text: "async", correct: true },
-        { text: "await", correct: false },
-        { text: "defer", correct: false },
-        { text: "asyncify", correct: false }
-        ]
-    },
-    {
-        question: "Which operator is used to get the remainder of a division?",
-        answers: [
-        { text: "%", correct: true },
-        { text: "/", correct: false },
-        { text: "mod", correct: false },
-        { text: "rem", correct: false }
-        ]
-    },
-    {
-        question: "Which function converts a string to a floating point number?",
-        answers: [
-        { text: "parseFloat()", correct: true },
-        { text: "parseInt()", correct: false },
-        { text: "Number()", correct: false },
-        { text: "toFloat()", correct: false }
-        ]
-    },
-    {
-        question: "Which function converts a string to an integer?",
-        answers: [
-        { text: "parseInt()", correct: true },
-        { text: "parseFloat()", correct: false },
-        { text: "toInteger()", correct: false },
-        { text: "Number.parse()", correct: false }
-        ]
-    },
-    {
-        question: "Which method removes whitespace from both ends of a string?",
-        answers: [
-        { text: "trim()", correct: true },
-        { text: "strip()", correct: false },
-        { text: "clean()", correct: false },
-        { text: "trimSpaces()", correct: false }
-        ]
-    },
-    {
-        question: "Which method returns a new string with specified replacements (does not modify the original)?",
-        answers: [
-        { text: "replace()", correct: true },
-        { text: "replaceAll()", correct: false },
-        { text: "splice()", correct: false },
-        { text: "update()", correct: false }
-        ]
-    },
-    {
-        question: "How do you select an element with id=\"app\" in the DOM?",
-        answers: [
-        { text: "document.getElementById(\"app\")", correct: true },
-        { text: "document.querySelectorAll(\"#app\")", correct: false },
-        { text: "document.getElementsByClassName(\"app\")", correct: false },
-        { text: "document.find(\"#app\")", correct: false }
-        ]
-    },
-    {
-        question: "Which method returns the first element that matches a CSS selector?",
-        answers: [
-        { text: "document.querySelector()", correct: true },
-        { text: "document.querySelectorAll()", correct: false },
-        { text: "document.getElementsByTagName()", correct: false },
-        { text: "document.getElement()", correct: false }
-        ]
-    },
-    // ----------------------
-    // JavaScript - Output code / scenario based questions (20+)
-    // ----------------------
-    {
-        question: "What is the output of the following code?\nconsole.log('5' + 3);",
-        answers: [
-        { text: "'53'", correct: true },
-        { text: "8", correct: false },
-        { text: "NaN", correct: false },
-        { text: "Error", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log(+'5' + 3);",
-        answers: [
-        { text: "8", correct: true },
-        { text: "'53'", correct: false },
-        { text: "NaN", correct: false },
-        { text: "undefined", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log(typeof undefined);",
-        answers: [
-        { text: "\"undefined\"", correct: true },
-        { text: "\"object\"", correct: false },
-        { text: "\"null\"", correct: false },
-        { text: "\"void\"", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log(typeof NaN);",
-        answers: [
-        { text: "\"number\"", correct: true },
-        { text: "\"NaN\"", correct: false },
-        { text: "\"object\"", correct: false },
-        { text: "\"undefined\"", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log(Boolean(''));",
-        answers: [
-        { text: "false", correct: true },
-        { text: "true", correct: false },
-        { text: "undefined", correct: false },
-        { text: "null", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log([] + []);",
-        answers: [
-        { text: "'' (empty string)", correct: true },
-        { text: "[]", correct: false },
-        { text: "undefined", correct: false },
-        { text: "[object Object][object Object]", correct: false }
-        ]
-    },
-    {
-        question: "What will the following code output?\nconsole.log([1,2,3].map(x => x * 2));",
-        answers: [
-        { text: "[2,4,6]", correct: true },
-        { text: "[1,2,3]", correct: false },
-        { text: "['2','4','6']", correct: false },
-        { text: "undefined", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log(typeof null);",
-        answers: [
-        { text: "\"object\"", correct: true },
-        { text: "\"null\"", correct: false },
-        { text: "\"undefined\"", correct: false },
-        { text: "\"error\"", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log(0 == false);\nconsole.log(0 === false);",
-        answers: [
-        { text: "true and false", correct: true },
-        { text: "false and false", correct: false },
-        { text: "true and true", correct: false },
-        { text: "false and true", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log('Hello'.charAt(1));",
-        answers: [
-        { text: "\"e\"", correct: true },
-        { text: "\"H\"", correct: false },
-        { text: "\"l\"", correct: false },
-        { text: "\"o\"", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nlet a = [1,2,3];\nlet b = a;\nb.push(4);\nconsole.log(a);",
-        answers: [
-        { text: "[1,2,3,4]", correct: true },
-        { text: "[1,2,3]", correct: false },
-        { text: "[4]", correct: false },
-        { text: "Error", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log('5' - 2);",
-        answers: [
-        { text: "3", correct: true },
-        { text: "'3'", correct: false },
-        { text: "NaN", correct: false },
-        { text: "52", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log([1,2] + [3,4]);",
-        answers: [
-        { text: "'1,23,4'", correct: true },
-        { text: "[1,2,3,4]", correct: false },
-        { text: "NaN", correct: false },
-        { text: "'[1,2][3,4]'", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log('10' / '2');",
-        answers: [
-        { text: "5", correct: true },
-        { text: "'5'", correct: false },
-        { text: "NaN", correct: false },
-        { text: "Error", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log(!!'false');",
-        answers: [
-        { text: "true", correct: true },
-        { text: "false", correct: false },
-        { text: "undefined", correct: false },
-        { text: "NaN", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log([...'abc']);",
-        answers: [
-        { text: "['a','b','c']", correct: true },
-        { text: "['abc']", correct: false },
-        { text: "['a b c']", correct: false },
-        { text: "Error", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log(void 0 === undefined);",
-        answers: [
-        { text: "true", correct: true },
-        { text: "false", correct: false },
-        { text: "undefined", correct: false },
-        { text: "TypeError", correct: false }
-        ]
-    },
-    {
-        question: "Consider the code:\nconsole.log(1 + '2' + 3);\nWhat is the output?",
-        answers: [
-        { text: "'123'", correct: true },
-        { text: "6", correct: false },
-        { text: "'33'", correct: false },
-        { text: "Error", correct: false }
-        ]
-    },
-    {
-        question: "Consider the code:\nconsole.log(1 + 2 + '3');\nWhat is the output?",
-        answers: [
-        { text: "'33'", correct: true },
-        { text: "6", correct: false },
-        { text: "'123'", correct: false },
-        { text: "Error", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log(Boolean('0'));\nconsole.log(Boolean(0));",
-        answers: [
-        { text: "true and false", correct: true },
-        { text: "false and true", correct: false },
-        { text: "true and true", correct: false },
-        { text: "false and false", correct: false }
-        ]
-    },
-    {
-        question: "What will be printed by this code?\nlet x;\nconsole.log(x);",
-        answers: [
-        { text: "undefined", correct: true },
-        { text: "null", correct: false },
-        { text: "0", correct: false },
-        { text: "Error", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code snippet?\nconsole.log( [1,2,3].slice(0,2) );",
-        answers: [
-        { text: "[1,2]", correct: true },
-        { text: "[1,2,3]", correct: false },
-        { text: "[2,3]", correct: false },
-        { text: "undefined", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log('abc'.indexOf('b'));",
-        answers: [
-        { text: "1", correct: true },
-        { text: "0", correct: false },
-        { text: "2", correct: false },
-        { text: "-1", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the code below?\nconst a = { x: 1 };\nconst b = { x: 1 };\nconsole.log(a === b);",
-        answers: [
-        { text: "false", correct: true },
-        { text: "true", correct: false },
-        { text: "TypeError", correct: false },
-        { text: "undefined", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log( typeof function(){} );",
-        answers: [
-        { text: "\"function\"", correct: true },
-        { text: "\"object\"", correct: false },
-        { text: "\"undefined\"", correct: false },
-        { text: "\"callable\"", correct: false }
-        ]
-    },
-    {
-        question: "What will the following code print?\nconsole.log([].length);",
-        answers: [
-        { text: "0", correct: true },
-        { text: "undefined", correct: false },
-        { text: "1", correct: false },
-        { text: "null", correct: false }
-        ]
-    },
-    {
-        question: "What is the output of the following code?\nconsole.log(''.length);",
-        answers: [
-        { text: "0", correct: true },
-        { text: "undefined", correct: false },
-        { text: "1", correct: false },
-        { text: "NaN", correct: false }
-        ]
-    },
-    // ----------------------
-    // Remaining JavaScript non-output intermediate/basic questions
-    // ----------------------
-    {
-        question: "Which keyword creates a property on the prototype of a constructor function when used as a method definition inside a class?",
-        answers: [
-        { text: "Methods defined in class body are added to prototype automatically", correct: true },
-        { text: "prototype", correct: false },
-        { text: "proto", correct: false },
-        { text: "__proto__", correct: false }
-        ]
-    },
-    {
-        question: "Which operator is used to spread elements of an iterable into individual elements?",
-        answers: [
-        { text: "... (spread operator)", correct: true },
-        { text: "++ (increment)", correct: false },
-        { text: "& (and)", correct: false },
-        { text: "* (multiply)", correct: false }
-        ]
-    },
-    {
-        question: "Which method merges two arrays returning a new array without modifying the originals?",
-        answers: [
-        { text: "concat()", correct: true },
-        { text: "push()", correct: false },
-        { text: "splice()", correct: false },
-        { text: "merge()", correct: false }
-        ]
-    },
-    {
-        question: "Which primitive types exist in JavaScript (ES6+)?",
-        answers: [
-        { text: "string, number, bigint, boolean, undefined, symbol, null", correct: true },
-        { text: "string, number, object, boolean", correct: false },
-        { text: "int, float, string, bool", correct: false },
-        { text: "string, char, boolean, undefined", correct: false }
-        ]
-    },
-    {
-        question: "What will `Promise.resolve(1)` return to `.then()` callback?",
-        answers: [
-        { text: "1 (resolved value)", correct: true },
-        { text: "Promise object", correct: false },
-        { text: "undefined", correct: false },
-        { text: "Error", correct: false }
-        ]
-    },
-    {
-        question: "Which method is best to add an event listener without overriding existing handlers?",
-        answers: [
-        { text: "element.addEventListener('click', handler)", correct: true },
-        { text: "element.onclick = handler", correct: false },
-        { text: "element.attachEvent('onclick', handler)", correct: false },
-        { text: "element.setListener('click', handler)", correct: false }
-        ]
-    },
-    {
-        question: "Which global object provides local storage for key/value pairs with no expiry?",
-        answers: [
-        { text: "localStorage", correct: true },
-        { text: "sessionStorage", correct: false },
-        { text: "cookies", correct: false },
-        { text: "indexedDB", correct: false }
-        ]
-    },
-    {
-        question: "Which method stops propagation of an event to parent elements?",
-        answers: [
-        { text: "event.stopPropagation()", correct: true },
-        { text: "event.preventDefault()", correct: false },
-        { text: "event.cancel()", correct: false },
-        { text: "event.stop()", correct: false }
-        ]
-    },
-    {
-        question: "Which method prevents the default action associated with the event?",
-        answers: [
-        { text: "event.preventDefault()", correct: true },
-        { text: "event.stopPropagation()", correct: false },
-        { text: "event.cancel()", correct: false },
-        { text: "event.prevent()", correct: false }
-        ]
-    },
-    {
-        question: "Which DOM method returns a NodeList of elements matching the selector?",
-        answers: [
-        { text: "document.querySelectorAll()", correct: true },
-        { text: "document.querySelector()", correct: false },
-        { text: "document.getElementsByClassName()", correct: false },
-        { text: "document.getElementById()", correct: false }
-        ]
-    },
-    {
-        question: "What is event delegation?",
-        answers: [
-        { text: "Attaching a single listener on a parent to handle events from its children.", correct: true },
-        { text: "Stopping event propagation in the capturing phase.", correct: false },
-        { text: "Handling events with inline handlers only.", correct: false },
-        { text: "Using multiple listeners for the same element.", correct: false }
-        ]
-    },
-    {
-        question: "Which syntax correctly defines an arrow function that returns the sum of two numbers?",
-        answers: [
-        { text: "(a, b) => a + b", correct: true },
-        { text: "function(a,b) => a + b", correct: false },
-        { text: "(a, b) => { a + b }", correct: false },
-        { text: "=> (a, b) { return a + b }", correct: false }
-        ]
-    },
-    {
-        question: "Which of these creates a shallow copy of an array?",
-        answers: [
-        { text: "arr.slice()", correct: true },
-        { text: "arr", correct: false },
-        { text: "arr.push()", correct: false },
-        { text: "arr.splice()", correct: false }
-        ]
-    },
-    {
-        question: "Which storage API is cleared when the browser tab is closed?",
-        answers: [
-        { text: "sessionStorage", correct: true },
-        { text: "localStorage", correct: false },
-        { text: "cookies", correct: false },
-        { text: "indexedDB", correct: false }
-        ]
-    },
-    {
-        question: "Which method is used to make an HTTP request in modern browsers (built-in)?",
-        answers: [
-        { text: "fetch()", correct: true },
-        { text: "XMLHttpRequest.open()", correct: false },
-        { text: "ajax()", correct: false },
-        { text: "http.request()", correct: false }
-        ]
-    },
-    {
-        question: "Which keyword is used to pause execution until a Promise resolves within an async function?",
-        answers: [
-        { text: "await", correct: true },
-        { text: "wait", correct: false },
-        { text: "pause", correct: false },
-        { text: "hold", correct: false }
-        ]
-    },
-    {
-        question: "Which method returns a shallow copy of an array from start to end (end not included)?",
-        answers: [
-        { text: "slice()", correct: true },
-        { text: "splice()", correct: false },
-        { text: "copy()", correct: false },
-        { text: "clone()", correct: false }
-        ]
-    },
-    {
-        question: "Which Array method changes the contents of an array by removing or replacing existing elements?",
-        answers: [
-        { text: "splice()", correct: true },
-        { text: "slice()", correct: false },
-        { text: "concat()", correct: false },
-        { text: "map()", correct: false }
-        ]
-    },
-    {
-        question: "Which built-in object provides methods for mathematical operations like rounding and random numbers?",
-        answers: [
-        { text: "Math", correct: true },
-        { text: "Number", correct: false },
-        { text: "Maths", correct: false },
-        { text: "Random", correct: false }
-        ]
-    },
-    {
-        question: "Which of these methods will schedule a function to run after at least the given milliseconds?",
-        answers: [
-        { text: "setTimeout(fn, ms)", correct: true },
-        { text: "setInterval(fn, ms)", correct: false },
-        { text: "requestAnimationFrame(fn)", correct: false },
-        { text: "schedule(fn, ms)", correct: false }
-        ]
-    },
-    {
-        question: "Which method repeatedly calls a function with a fixed time delay between each call?",
-        answers: [
-        { text: "setInterval(fn, ms)", correct: true },
-        { text: "setTimeout(fn, ms)", correct: false },
-        { text: "requestAnimationFrame(fn)", correct: false },
-        { text: "setRepeat(fn, ms)", correct: false }
-        ]
-    },
-    {
-        question: "Which of the following returns true if at least one element in the array passes the test implemented by the provided function?",
-        answers: [
-        { text: "some()", correct: true },
-        { text: "every()", correct: false },
-        { text: "filter()", correct: false },
-        { text: "map()", correct: false }
-        ]
-    },
-    {
-        question: "Which of the following returns true only if all elements in the array pass the test?",
-        answers: [
-        { text: "every()", correct: true },
-        { text: "some()", correct: false },
-        { text: "filter()", correct: false },
-        { text: "reduce()", correct: false }
-        ]
-    },
-    {
-        question: "Which operator is used to access properties of an object using a string key when the key is dynamic?",
-        answers: [
-        { text: "bracket notation (obj[key])", correct: true },
-        { text: "dot notation (obj.key)", correct: false },
-        { text: "arrow operator", correct: false },
-        { text: "colon operator", correct: false }
-        ]
-    },
-    {
-        question: "What will `Object.keys({a:1,b:2}).length` return?",
-        answers: [
-        { text: "2", correct: true },
-        { text: "0", correct: false },
-        { text: "1", correct: false },
-        { text: "undefined", correct: false }
-        ]
-    },
-    {
-        question: "Which method checks whether a property exists directly on an object (not in its prototype chain)?",
-        answers: [
-        { text: "Object.hasOwnProperty(prop)", correct: true },
-        { text: "prop in object", correct: false },
-        { text: "object.hasOwn(prop)", correct: false },
-        { text: "object.contains(prop)", correct: false }
-        ]
-    },
-    {
-        question: "Which built-in object allows scheduling a function to run before the next repaint?",
-        answers: [
-        { text: "requestAnimationFrame()", correct: true },
-        { text: "setTimeout()", correct: false },
-        { text: "setInterval()", correct: false },
-        { text: "queueMicrotask()", correct: false }
-        ]
-    },
-    {
-        question: "Which method converts a value to a string suitable for JSON transmission?",
-        answers: [
-        { text: "JSON.stringify()", correct: true },
-        { text: "JSON.toString()", correct: false },
-        { text: "Stringify()", correct: false },
-        { text: "toJSON()", correct: false }
-        ]
-    },
-    {
-        question: "Which statement creates a new Promise that resolves after 1 second with value 'done'?",
-        answers: [
-        { text: "new Promise(resolve => setTimeout(() => resolve('done'), 1000))", correct: true },
-        { text: "Promise.resolve('done', 1000)", correct: false },
-        { text: "delay('done', 1000)", correct: false },
-        { text: "setTimeout(() => Promise.resolve('done'), 1000)", correct: false }
-        ]
-    },
-    {
-        question: "Which method creates a shallow copy of an object merging properties from sources into target?",
-        answers: [
-        { text: "Object.assign(target, ...sources)", correct: true },
-        { text: "Object.merge(target, ...sources)", correct: false },
-        { text: "target.merge(...sources)", correct: false },
-        { text: "clone(target, ...sources)", correct: false }
-        ]
-    },
-    {
-        question: "Which of the following is true about arrow functions compared to traditional functions?",
-        answers: [
-        { text: "Arrow functions do not have their own `this` binding.", correct: true },
-        { text: "Arrow functions hoist like function declarations.", correct: false },
-        { text: "Arrow functions can be used as constructors with `new`.", correct: false },
-        { text: "Arrow functions create a new prototype property.", correct: false }
-        ]
-    },
-    {
-        question: "Which global method queues a microtask to be executed after the current call stack but before rendering?",
-        answers: [
-        { text: "queueMicrotask()", correct: true },
-        { text: "setTimeout(...,0)", correct: false },
-        { text: "Promise.resolve().then(...)", correct: false },
-        { text: "requestAnimationFrame()", correct: false }
-        ]
-    },
-    {
-        question: "Which method returns a promise that resolves when all input promises resolve?",
-        answers: [
-        { text: "Promise.all()", correct: true },
-        { text: "Promise.race()", correct: false },
-        { text: "Promise.any()", correct: false },
-        { text: "Promise.allSettled()", correct: false }
-        ]
-    },
-    {
-        question: "Which method returns a promise that resolves as soon as one of the input promises resolves?",
-        answers: [
-        { text: "Promise.race()", correct: true },
-        { text: "Promise.all()", correct: false },
-        { text: "Promise.any()", correct: false },
-        { text: "Promise.resolve()", correct: false }
-        ]
-    },
-    {
-        question: "Which method returns a promise that resolves if any of the input promises fulfills, otherwise rejects?",
-        answers: [
-        { text: "Promise.any()", correct: true },
-        { text: "Promise.all()", correct: false },
-        { text: "Promise.race()", correct: false },
-        { text: "Promise.first()", correct: false }
-        ]
-    },
-    {
-        question: "What does `document.createElement('div')` do?",
-        answers: [
-        { text: "Creates and returns a new DIV element (not yet attached to the DOM).", correct: true },
-        { text: "Creates and attaches a DIV to the DOM immediately.", correct: false },
-        { text: "Selects an existing DIV element.", correct: false },
-        { text: "Throws an error if no DIV exists.", correct: false }
-        ]
-    },
-    {
-        question: "Which of these loops iterates over the enumerable property names of an object?",
-        answers: [
-        { text: "for...in", correct: true },
-        { text: "for...of", correct: false },
-        { text: "forEach", correct: false },
-        { text: "while", correct: false }
-        ]
-    },
-    {
-        question: "Which of these loops iterates over iterable values (like arrays)?",
-        answers: [
-        { text: "for...of", correct: true },
-        { text: "for...in", correct: false },
-        { text: "forEach", correct: false },
-        { text: "map", correct: false }
-        ]
-    },
-    {
-        question: "Which of the following is true about `const` with objects?",
-        answers: [
-        { text: "You can mutate properties, but cannot reassign the variable binding.", correct: true },
-        { text: "You cannot change properties or reassign.", correct: false },
-        { text: "You cannot change properties but can reassign.", correct: false },
-        { text: "It creates an immutable deep copy.", correct: false }
-        ]
-    },
-    {
-        question: "Which method is used to parse an integer in a specified base?",
-        answers: [
-        { text: "parseInt(string, radix)", correct: true },
-        { text: "Number.parse(string, base)", correct: false },
-        { text: "int()", correct: false },
-        { text: "parseInteger()", correct: false }
-        ]
-    },
-    {
-        question: "Which of these returns the current timestamp in milliseconds since the Unix epoch?",
-        answers: [
-        { text: "Date.now()", correct: true },
-        { text: "new Date().getTime()", correct: false },
-        { text: "performance.now()", correct: false },
-        { text: "Date.timestamp()", correct: false }
-        ]
-    },
-    {
-        question: "Which API provides low-level storage for large amounts of structured data in the browser?",
-        answers: [
-        { text: "indexedDB", correct: true },
-        { text: "localStorage", correct: false },
-        { text: "sessionStorage", correct: false },
-        { text: "cookies", correct: false }
-        ]
-    },
-    {
-        question: "Which keyword allows you to import named exports from a module (ES modules)?",
-        answers: [
-        { text: "import { name } from 'module'", correct: true },
-        { text: "require('module')", correct: false },
-        { text: "include 'module'", correct: false },
-        { text: "load 'module'", correct: false }
-        ]
-    },
-    {
-        question: "Which technique improves perceived performance by only rendering visible elements in a long list?",
-        answers: [
-        { text: "Virtualization (virtual scrolling)", correct: true },
-        { text: "Lazy loading images", correct: false },
-        { text: "Preloading resources", correct: false },
-        { text: "Bundling scripts", correct: false }
-        ]
-    },
-    {
-        question: "Which of the following will correctly check whether a value is NaN (not a number)?",
-        answers: [
-        { text: "Number.isNaN(value)", correct: true },
-        { text: "isNaN(value)", correct: false },
-        { text: "value === NaN", correct: false },
-        { text: "typeof value === 'NaN'", correct: false }
-        ]
-    },
-    {
-        question: "Which method creates a shallow copy of a portion of an array into a new array object?",
-        answers: [
-        { text: "slice()", correct: true },
-        { text: "splice()", correct: false },
-        { text: "copy()", correct: false },
-        { text: "clone()", correct: false }
-        ]
-    }
+    	// ========================================
+    	// MODULE 1: HTML FUNDAMENTALS (~50 questions)
+    	// Category: html
+    	// ========================================
+    	// 1.1 Document Structure and Markup Basics
+    	{ category: "html", question: "What is the correct DOCTYPE declaration for HTML5?", answers: [{ text: "<!DOCTYPE HTML5>", correct: false }, { text: "<!DOCTYPE html>", correct: true }, { text: "<DOCTYPE html>", correct: false }, { text: "<!DOCUMENT html>", correct: false }] },
+    	{ category: "html", question: "Which meta tag is essential for proper UTF-8 character encoding?", answers: [{ text: "<meta encoding='utf-8'>", correct: false }, { text: "<meta charset='utf-8'>", correct: true }, { text: "<meta type='utf-8'>", correct: false }, { text: "<meta content='utf-8'>", correct: false }] },
+    	{ category: "html", question: "Which meta tag configures the viewport for responsive design?", answers: [{ text: "<meta name='responsive' content='width=device-width'>", correct: false }, { text: "<meta name='viewport' content='width=device-width, initial-scale=1'>", correct: true }, { text: "<meta viewport='device-width'>", correct: false }, { text: "<meta name='screen' content='mobile'>", correct: false }] },
+    	{ category: "html", question: "Where should the <title> element be placed in an HTML document?", answers: [{ text: "Inside <body>", correct: false }, { text: "Inside <head>", correct: true }, { text: "Before <!DOCTYPE>", correct: false }, { text: "After <body>", correct: false }] },
+    	{ category: "html", question: "What is the purpose of the lang attribute in the <html> tag?", answers: [{ text: "Defines the programming language", correct: false }, { text: "Specifies the document's natural language", correct: true }, { text: "Sets the page layout direction", correct: false }, { text: "Declares the HTML version", correct: false }] },
+    	{ category: "html", question: "Which of the following is proper HTML5 markup nesting?", answers: [{ text: "<p><div>Text</div></p>", correct: false }, { text: "<div><p>Text</p></div>", correct: true }, { text: "<span><body>Text</body></span>", correct: false }, { text: "<h1><h2>Text</h2></h1>", correct: false }] },
+    	{ category: "html", question: "How should special characters like < and > be escaped in HTML content?", answers: [{ text: "\\< and \\>", correct: false }, { text: "&lt; and &gt;", correct: true }, { text: "{< and >}", correct: false }, { text: "No escaping needed", correct: false }] },
+    	{ category: "html", question: "Which attribute must NOT have duplicate values across a single HTML page?", answers: [{ text: "class", correct: false }, { text: "name", correct: false }, { text: "id", correct: true }, { text: "type", correct: false }] },
+    	// 1.2 Structured and Semantic HTML Content
+    	{ category: "html", question: "Which element defines the main unique content of a document?", answers: [{ text: "<content>", correct: false }, { text: "<section>", correct: false }, { text: "<main>", correct: true }, { text: "<primary>", correct: false }] },
+    	{ category: "html", question: "What is the purpose of the <article> element?", answers: [{ text: "Any text content", correct: false }, { text: "Self-contained, independently distributable content", correct: true }, { text: "Grouping blog articles only", correct: false }, { text: "Creating layout columns", correct: false }] },
+    	{ category: "html", question: "What is the semantic purpose of the <aside> element?", answers: [{ text: "Main page content", correct: false }, { text: "Tangentially related or complementary content", correct: true }, { text: "Side navigation only", correct: false }, { text: "Footer content", correct: false }] },
+    	{ category: "html", question: "Which element should wrap a set of primary navigation links?", answers: [{ text: "<menu>", correct: false }, { text: "<nav>", correct: true }, { text: "<links>", correct: false }, { text: "<navigation>", correct: false }] },
+    	{ category: "html", question: "How many <main> elements should typically be present on a page?", answers: [{ text: "As many as needed", correct: false }, { text: "Exactly one", correct: true }, { text: "At least two", correct: false }, { text: "None if using <div>", correct: false }] },
+    	{ category: "html", question: "Which element groups table body content?", answers: [{ text: "<table-body>", correct: false }, { text: "<body>", correct: false }, { text: "<tbody>", correct: true }, { text: "<tgroup>", correct: false }] },
+    	{ category: "html", question: "What is the correct use of the <hr> element?", answers: [{ text: "Decorative horizontal line", correct: false }, { text: "Creating paragraph spacing", correct: false }, { text: "Representing a thematic break between sections", correct: true }, { text: "Separating list items", correct: false }] },
+    	{ category: "html", question: "Which element is used for term-definition pairs?", answers: [{ text: "<ul> with <li>", correct: false }, { text: "<ol> with <li>", correct: false }, { text: "<dl> with <dt> and <dd>", correct: true }, { text: "<list> with <term>", correct: false }] },
+    	{ category: "html", question: "What is the semantic difference between <section> and <article>?", answers: [{ text: "No difference", correct: false }, { text: "<section> groups related content; <article> is self-contained", correct: true }, { text: "<article> is older than <section>", correct: false }, { text: "<section> is for blog posts only", correct: false }] },
+    	{ category: "html", question: "Which heading level should typically be used only once per page?", answers: [{ text: "<h2>", correct: false }, { text: "<h1>", correct: true }, { text: "<h3>", correct: false }, { text: "All can be used multiple times", correct: false }] },
+    	{ category: "html", question: "What is the purpose of the <caption> element in tables?", answers: [{ text: "To style table headers", correct: false }, { text: "To provide a table title or summary", correct: true }, { text: "To create table footer", correct: false }, { text: "To group table columns", correct: false }] },
+    	{ category: "html", question: "Which element should be used for standalone line breaks in addresses or poetry?", answers: [{ text: "<br>", correct: true }, { text: "<lb>", correct: false }, { text: "<newline>", correct: false }, { text: "Multiple <p> tags", correct: false }] },
+    	// 1.3 Media, Forms, and Navigation
+    	{ category: "html", question: "Which attribute is mandatory for accessibility in <img> tags?", answers: [{ text: "title", correct: false }, { text: "alt", correct: true }, { text: "caption", correct: false }, { text: "description", correct: false }] },
+    	{ category: "html", question: "What is the purpose of the loading='lazy' attribute on images?", answers: [{ text: "Load image faster", correct: false }, { text: "Defer image loading until near viewport", correct: true }, { text: "Reduce image quality", correct: false }, { text: "Make image responsive", correct: false }] },
+    	{ category: "html", question: "Which elements should wrap media with captions?", answers: [{ text: "<media> and <caption>", correct: false }, { text: "<figure> and <figcaption>", correct: true }, { text: "<img> and <cap>", correct: false }, { text: "<picture> and <title>", correct: false }] },
+    	{ category: "html", question: "Which input type is used for date selection in HTML5 forms?", answers: [{ text: "type='calendar'", correct: false }, { text: "type='date'", correct: true }, { text: "type='datetime'", correct: false }, { text: "type='picker'", correct: false }] },
+    	{ category: "html", question: "Which form attribute specifies the HTTP method for submission?", answers: [{ text: "action", correct: false }, { text: "method", correct: true }, { text: "type", correct: false }, { text: "submit", correct: false }] },
+    	{ category: "html", question: "What is the purpose of rel='noopener noreferrer' with target='_blank'?", answers: [{ text: "Improve SEO", correct: false }, { text: "Enhance security and performance when opening in new tab", correct: true }, { text: "Prevent link from opening", correct: false }, { text: "Add animations", correct: false }] },
+    	{ category: "html", question: "Which attribute provides suggestions for input fields?", answers: [{ text: "<suggest>", correct: false }, { text: "<datalist>", correct: true }, { text: "<options>", correct: false }, { text: "autocomplete", correct: false }] },
+    	{ category: "html", question: "What is the purpose of the <fieldset> element?", answers: [{ text: "Create form layout grid", correct: false }, { text: "Group related form controls together", correct: true }, { text: "Validate form inputs", correct: false }, { text: "Submit form data", correct: false }] },
+    	{ category: "html", question: "Which button type prevents form submission?", answers: [{ text: "type='submit'", correct: false }, { text: "type='button'", correct: true }, { text: "type='reset'", correct: false }, { text: "type='click'", correct: false }] },
+    	{ category: "html", question: "What enctype is required for file upload forms?", answers: [{ text: "application/json", correct: false }, { text: "multipart/form-data", correct: true }, { text: "text/plain", correct: false }, { text: "application/x-www-form-urlencoded", correct: false }] },
+    	{ category: "html", question: "Which attribute links a <label> to its form control?", answers: [{ text: "name", correct: false }, { text: "for", correct: true }, { text: "id", correct: false }, { text: "link", correct: false }] },
+    	{ category: "html", question: "What is the purpose of the srcset attribute on images?", answers: [{ text: "Set image source", correct: false }, { text: "Provide multiple image sources for different screen sizes", correct: true }, { text: "Set image style", correct: false }, { text: "Link to external images", correct: false }] },
+    	{ category: "html", question: "Which element adds subtitles or captions to video content?", answers: [{ text: "<subtitle>", correct: false }, { text: "<track kind='captions'>", correct: true }, { text: "<caption>", correct: false }, { text: "<text>", correct: false }] },
+    	{ category: "html", question: "What is the recommended minimum size for touch targets?", answers: [{ text: "24×24 px", correct: false }, { text: "44×44 px", correct: true }, { text: "100×100 px", correct: false }, { text: "16×16 px", correct: false }] },
+    	{ category: "html", question: "Which attribute makes an iframe more secure?", answers: [{ text: "security='high'", correct: false }, { text: "sandbox", correct: true }, { text: "safe='true'", correct: false }, { text: "protected", correct: false }] },
+    	{ category: "html", question: "What HTML5 constraint validates email format?", answers: [{ text: "required", correct: false }, { text: "type='email'", correct: true }, { text: "validate='email'", correct: false }, { text: "format='email'", correct: false }] },
+    	{ category: "html", question: "Which attribute describes the purpose of an iframe?", answers: [{ text: "description", correct: false }, { text: "title", correct: true }, { text: "alt", correct: false }, { text: "caption", correct: false }] },
+    	{ category: "html", question: "What is the purpose of the <output> element?", answers: [{ text: "Display user input", correct: false }, { text: "Show result of a calculation or user action", correct: true }, { text: "Print form data", correct: false }, { text: "Export data", correct: false }] },
+    	{ category: "html", question: "Which form method should be used for search queries?", answers: [{ text: "POST", correct: false }, { text: "GET", correct: true }, { text: "PUT", correct: false }, { text: "SEARCH", correct: false }] },
+    	{ category: "html", question: "What attribute provides width and height to reduce layout shift?", answers: [{ text: "size", correct: false }, { text: "width and height", correct: true }, { text: "dimensions", correct: false }, { text: "aspect-ratio", correct: false }] },
+    	{ category: "html", question: "Which input type creates a color picker?", answers: [{ text: "type='color'", correct: true }, { text: "type='picker'", correct: false }, { text: "type='palette'", correct: false }, { text: "type='rgb'", correct: false }] },
+    	{ category: "html", question: "What does the pattern attribute do in input fields?", answers: [{ text: "Sets input style", correct: false }, { text: "Validates input against a regular expression", correct: true }, { text: "Creates repeated inputs", correct: false }, { text: "Defines input placeholder", correct: false }] },
+    	{ category: "html", question: "Which attribute makes a form control required?", answers: [{ text: "mandatory", correct: false }, { text: "required", correct: true }, { text: "needed", correct: false }, { text: "validate", correct: false }] },
+    	{ category: "html", question: "What is the purpose of the <legend> element?", answers: [{ text: "Create table legend", correct: false }, { text: "Provide a caption for <fieldset>", correct: true }, { text: "Add image descriptions", correct: false }, { text: "Define form actions", correct: false }] },
+    	{ category: "html", question: "Which input type creates a range slider?", answers: [{ text: "type='slider'", correct: false }, { text: "type='range'", correct: true }, { text: "type='scale'", correct: false }, { text: "type='number'", correct: false }] },
+    	{ category: "html", question: "What attribute suggests input format to mobile keyboards?", answers: [{ text: "keyboard", correct: false }, { text: "inputmode", correct: true }, { text: "keytype", correct: false }, { text: "format", correct: false }] },
+    	{ category: "html", question: "Which element groups dropdown options?", answers: [{ text: "<optgroup>", correct: true }, { text: "<group>", correct: false }, { text: "<options>", correct: false }, { text: "<select-group>", correct: false }] },
+    	{ category: "html", question: "What is the semantic purpose of <address>?", answers: [{ text: "Display any address", correct: false }, { text: "Provide contact information for article/page author", correct: true }, { text: "Show company address only", correct: false }, { text: "Create address form", correct: false }] },
+    	{ category: "html", question: "Which HTML5 element embeds external content?", answers: [{ text: "<external>", correct: false }, { text: "<embed>", correct: true }, { text: "<plugin>", correct: false }, { text: "<content>", correct: false }] },
+    	{ category: "html", question: "What is the correct way to comment in HTML?", answers: [{ text: "// comment", correct: false }, { text: "/* comment */", correct: false }, { text: "<!-- comment -->", correct: true }, { text: "# comment", correct: false }] },
+    	{ category: "html", question: "Which element defines a description list?", answers: [{ text: "<dl>", correct: true }, { text: "<list>", correct: false }, { text: "<desc>", correct: false }, { text: "<description>", correct: false }] },
+    	{ category: "html", question: "What does the defer attribute do on scripts?", answers: [{ text: "Delays script forever", correct: false }, { text: "Executes script after HTML parsing completes", correct: true }, { text: "Disables the script", correct: false }, { text: "Runs script immediately", correct: false }] },
+    	{ category: "html", question: "What does the async attribute do on scripts?", answers: [{ text: "Synchronizes scripts", correct: false }, { text: "Downloads script asynchronously and executes when ready", correct: true }, { text: "Makes script wait", correct: false }, { text: "Validates script", correct: false }] },
+    	{ category: "html", question: "Which input type creates a telephone number field?", answers: [{ text: "type='phone'", correct: false }, { text: "type='tel'", correct: true }, { text: "type='telephone'", correct: false }, { text: "type='number'", correct: false }] },
+    	{ category: "html", question: "Which element represents a progress bar?", answers: [{ text: "<bar>", correct: false }, { text: "<progress>", correct: true }, { text: "<meter>", correct: false }, { text: "<loading>", correct: false }] },
+    	{ category: "html", question: "Which element represents a scalar measurement within a range?", answers: [{ text: "<range>", correct: false }, { text: "<meter>", correct: true }, { text: "<progress>", correct: false }, { text: "<scale>", correct: false }] },
+    	{ category: "html", question: "What is the purpose of the <time> element?", answers: [{ text: "Display current time", correct: false }, { text: "Represent dates/times in machine-readable format", correct: true }, { text: "Create timers", correct: false }, { text: "Set timezone", correct: false }] },
+    	{ category: "html", question: "Which attribute makes media elements show playback controls?", answers: [{ text: "show-controls", correct: false }, { text: "controls", correct: true }, { text: "player", correct: false }, { text: "ui", correct: false }] },
+    	{ category: "html", question: "What does the autoplay attribute do?", answers: [{ text: "Automatically plays media when page loads", correct: true }, { text: "Plays on click", correct: false }, { text: "Loops media", correct: false }, { text: "Mutes media", correct: false }] },
+    	// ========================================
+    	// MODULE 2: CSS FUNDAMENTALS (~45 questions)
+    	// Category: css
+    	// ========================================
+    	// 2.1 Core CSS Concepts
+    	{ category: "css", question: "Which CSS selector has the highest specificity?", answers: [{ text: "Element selector (p)", correct: false }, { text: "Class selector (.class)", correct: false }, { text: "ID selector (#id)", correct: true }, { text: "Universal selector (*)", correct: false }] },
+    	{ category: "css", question: "What does 'cascade' mean in CSS?", answers: [{ text: "The order of stylesheets", correct: false }, { text: "The process determining which styles apply based on specificity and source order", correct: true }, { text: "Property inheritance", correct: false }, { text: "Document flow", correct: false }] },
+    	{ category: "css", question: "What is the correct box model order from inside out?", answers: [{ text: "Margin, Border, Padding, Content", correct: false }, { text: "Content, Padding, Border, Margin", correct: true }, { text: "Content, Margin, Border, Padding", correct: false }, { text: "Padding, Content, Border, Margin", correct: false }] },
+    	{ category: "css", question: "What does box-sizing: border-box do?", answers: [{ text: "Removes element border", correct: false }, { text: "Includes padding and border in element's total width and height", correct: true }, { text: "Adds box shadow", correct: false }, { text: "Makes the box square", correct: false }] },
+    	{ category: "css", question: "How do you calculate specificity for '#header .nav li'?", answers: [{ text: "0-1-1", correct: false }, { text: "1-1-1", correct: true }, { text: "0-2-1", correct: false }, { text: "1-0-2", correct: false }] },
+    	{ category: "css", question: "Which properties are inherited by default?", answers: [{ text: "margin and padding", correct: false }, { text: "color and font-family", correct: true }, { text: "width and height", correct: false }, { text: "border and background", correct: false }] },
+    	{ category: "css", question: "What is the purpose of CSS custom properties (variables)?", answers: [{ text: "Make CSS heavier", correct: false }, { text: "Centralize design values and reduce repetition", correct: true }, { text: "Increase specificity", correct: false }, { text: "Compile CSS faster", correct: false }] },
+    	{ category: "css", question: "Which unit is relative to the parent element's font size?", answers: [{ text: "px", correct: false }, { text: "rem", correct: false }, { text: "em", correct: true }, { text: "pt", correct: false }] },
+    	{ category: "css", question: "Which unit is relative to the root element's font size?", answers: [{ text: "px", correct: false }, { text: "rem", correct: true }, { text: "em", correct: false }, { text: "%", correct: false }] },
+    	{ category: "css", question: "What does the :hover pseudo-class do?", answers: [{ text: "Style visited links", correct: false }, { text: "Apply styles when cursor moves over element", correct: true }, { text: "Style first child", correct: false }, { text: "Style focused elements", correct: false }] },
+    	{ category: "css", question: "Which selector targets the first child of a parent?", answers: [{ text: ":first", correct: false }, { text: ":first-child", correct: true }, { text: ":child(1)", correct: false }, { text: ":nth(1)", correct: false }] },
+    	{ category: "css", question: "What is the purpose of the ::before pseudo-element?", answers: [{ text: "Insert content before page loads", correct: false }, { text: "Insert generated content before element's content", correct: true }, { text: "Style the element before hover", correct: false }, { text: "Load CSS before HTML", correct: false }] },
+    	{ category: "css", question: "Which CSS property controls text color?", answers: [{ text: "text-color", correct: false }, { text: "color", correct: true }, { text: "font-color", correct: false }, { text: "foreground", correct: false }] },
+    	{ category: "css", question: "What does font-weight: bold equal numerically?", answers: [{ text: "400", correct: false }, { text: "700", correct: true }, { text: "900", correct: false }, { text: "500", correct: false }] },
+    	{ category: "css", question: "Which property controls the space between lines of text?", answers: [{ text: "line-spacing", correct: false }, { text: "line-height", correct: true }, { text: "text-spacing", correct: false }, { text: "leading", correct: false }] },
+    	// 2.2 Layout, Effects, and Positioning
+    	{ category: "css", question: "What is the difference between position: absolute and position: fixed?", answers: [{ text: "No difference", correct: false }, { text: "absolute positions relative to nearest positioned ancestor; fixed positions relative to viewport", correct: true }, { text: "fixed doesn't work on mobile", correct: false }, { text: "absolute is faster", correct: false }] },
+    	{ category: "css", question: "What does the z-index property control?", answers: [{ text: "Zoom level", correct: false }, { text: "Stacking order of positioned elements", correct: true }, { text: "Vertical alignment", correct: false }, { text: "Z-axis animations", correct: false }] },
+    	{ category: "css", question: "Which property creates smooth state transitions?", answers: [{ text: "animation", correct: false }, { text: "transform", correct: false }, { text: "transition", correct: true }, { text: "smooth", correct: false }] },
+    	{ category: "css", question: "What does position: sticky do?", answers: [{ text: "Makes element stick to cursor", correct: false }, { text: "Toggles between relative and fixed based on scroll position", correct: true }, { text: "Prevents element from moving", correct: false }, { text: "Creates sticky notes", correct: false }] },
+    	{ category: "css", question: "Which transform function rotates an element?", answers: [{ text: "spin()", correct: false }, { text: "rotate()", correct: true }, { text: "turn()", correct: false }, { text: "twist()", correct: false }] },
+    	{ category: "css", question: "What does overflow: hidden do?", answers: [{ text: "Hides the element", correct: false }, { text: "Clips content that exceeds element's box", correct: true }, { text: "Makes element invisible", correct: false }, { text: "Removes element from flow", correct: false }] },
+    	{ category: "css", question: "Which property controls element opacity?", answers: [{ text: "transparency", correct: false }, { text: "opacity", correct: true }, { text: "alpha", correct: false }, { text: "visibility", correct: false }] },
+    	{ category: "css", question: "What does display: none do?", answers: [{ text: "Makes element transparent", correct: false }, { text: "Removes element from document flow completely", correct: true }, { text: "Hides element but keeps space", correct: false }, { text: "Collapses element borders", correct: false }] },
+    	{ category: "css", question: "What is the difference between display: none and visibility: hidden?", answers: [{ text: "No difference", correct: false }, { text: "display: none removes from flow; visibility: hidden keeps space", correct: true }, { text: "visibility: hidden is faster", correct: false }, { text: "display: none is for images only", correct: false }] },
+    	{ category: "css", question: "Which property creates rounded corners?", answers: [{ text: "corner-radius", correct: false }, { text: "border-radius", correct: true }, { text: "round-corners", correct: false }, { text: "corner-style", correct: false }] },
+    	{ category: "css", question: "What does box-shadow do?", answers: [{ text: "Creates element border", correct: false }, { text: "Adds shadow effect to element's box", correct: true }, { text: "Darkens element background", correct: false }, { text: "Applies shadow to text", correct: false }] },
+    	{ category: "css", question: "Which filter applies blur effect?", answers: [{ text: "filter: blur(5px)", correct: true }, { text: "blur: 5px", correct: false }, { text: "filter: fuzzy(5px)", correct: false }, { text: "effect: blur(5px)", correct: false }] },
+    	{ category: "css", question: "What does @keyframes define?", answers: [{ text: "CSS variables", correct: false }, { text: "Animation sequence steps", correct: true }, { text: "Media queries", correct: false }, { text: "Import statements", correct: false }] },
+    	{ category: "css", question: "Which property sets animation timing?", answers: [{ text: "animation-speed", correct: false }, { text: "animation-duration", correct: true }, { text: "animation-time", correct: false }, { text: "duration", correct: false }] },
+    	{ category: "css", question: "What does will-change property do?", answers: [{ text: "Predicts future CSS changes", correct: false }, { text: "Hints browser about upcoming transformations for optimization", correct: true }, { text: "Changes element automatically", correct: false }, { text: "Validates CSS syntax", correct: false }] },
+    	// 2.3 Frameworks, Preprocessors, and Performance
+    	{ category: "css", question: "What is the main advantage of CSS preprocessors like Sass?", answers: [{ text: "Execute CSS in browser", correct: false }, { text: "Write more maintainable CSS with variables, nesting, and mixins", correct: true }, { text: "Replace CSS completely", correct: false }, { text: "Make CSS slower", correct: false }] },
+    	{ category: "css", question: "What does CSS minification do?", answers: [{ text: "Reduces CSS specificity", correct: false }, { text: "Removes whitespace and comments to reduce file size", correct: true }, { text: "Minimizes CSS properties", correct: false }, { text: "Converts CSS to inline", correct: false }] },
+    	{ category: "css", question: "What is critical CSS?", answers: [{ text: "Most important CSS rules", correct: false }, { text: "Above-the-fold CSS inlined for faster initial render", correct: true }, { text: "CSS for critical errors", correct: false }, { text: "High-priority stylesheets", correct: false }] },
+    	{ category: "css", question: "What does autoprefixing do?", answers: [{ text: "Adds CSS comments", correct: false }, { text: "Automatically adds vendor prefixes for browser compatibility", correct: true }, { text: "Prefixes all class names", correct: false }, { text: "Validates CSS", correct: false }] },
+    	{ category: "css", question: "Which CSS methodology promotes reusability and naming conventions?", answers: [{ text: "BEM (Block Element Modifier)", correct: true }, { text: "HTML5", correct: false }, { text: "Bootstrap", correct: false }, { text: "Flexbox", correct: false }] },
+    	{ category: "css", question: "What is the purpose of CSS Grid system in frameworks like Bootstrap?", answers: [{ text: "Create databases", correct: false }, { text: "Provide responsive column-based layout structure", correct: true }, { text: "Display images in grid", correct: false }, { text: "Organize CSS files", correct: false }] },
+    	{ category: "css", question: "What does @import do in CSS?", answers: [{ text: "Imports JavaScript", correct: false }, { text: "Includes external CSS files", correct: true }, { text: "Imports images", correct: false }, { text: "Loads fonts", correct: false }] },
+    	{ category: "css", question: "Which technique reduces unused CSS in production?", answers: [{ text: "CSS compression", correct: false }, { text: "Tree-shaking or purging", correct: true }, { text: "Inline all CSS", correct: false }, { text: "Use only IDs", correct: false }] },
+    	{ category: "css", question: "What is the benefit of CSS concatenation?", answers: [{ text: "Increases file size", correct: false }, { text: "Reduces HTTP requests by combining files", correct: true }, { text: "Improves specificity", correct: false }, { text: "Validates CSS", correct: false }] },
+    	{ category: "css", question: "Which CSS unit is best for responsive typography?", answers: [{ text: "px", correct: false }, { text: "rem or em", correct: true }, { text: "pt", correct: false }, { text: "cm", correct: false }] },
+    	{ category: "css", question: "What does the clamp() function do?", answers: [{ text: "Restricts elements to viewport", correct: false }, { text: "Sets a value between minimum and maximum bounds", correct: true }, { text: "Clips content", correct: false }, { text: "Validates input", correct: false }] },
+    	{ category: "css", question: "Which property respects user's motion preferences?", answers: [{ text: "@media (prefers-reduced-motion)", correct: true }, { text: "@media (no-animation)", correct: false }, { text: "animation: none", correct: false }, { text: "motion: reduce", correct: false }] },
+    	{ category: "css", question: "What does the min() function return?", answers: [{ text: "Minimum element size", correct: false }, { text: "The smallest of given values", correct: true }, { text: "Minimum specificity", correct: false }, { text: "Minimized CSS", correct: false }] },
+    	{ category: "css", question: "What does the max() function return?", answers: [{ text: "Maximum element size", correct: false }, { text: "The largest of given values", correct: true }, { text: "Maximum specificity", correct: false }, { text: "Maximized CSS", correct: false }] },
+    	{ category: "css", question: "Which positioning value keeps element in normal flow?", answers: [{ text: "absolute", correct: false }, { text: "static", correct: true }, { text: "fixed", correct: false }, { text: "sticky", correct: false }] },
+    	{ category: "css", question: "What is the default display value for <div>?", answers: [{ text: "inline", correct: false }, { text: "block", correct: true }, { text: "inline-block", correct: false }, { text: "flex", correct: false }] },
+    	{ category: "css", question: "What is the default display value for <span>?", answers: [{ text: "inline", correct: true }, { text: "block", correct: false }, { text: "inline-block", correct: false }, { text: "flex", correct: false }] },
+    	{ category: "css", question: "Which property controls text alignment?", answers: [{ text: "align", correct: false }, { text: "text-align", correct: true }, { text: "content-align", correct: false }, { text: "alignment", correct: false }] },
+    	{ category: "css", question: "What does cursor: pointer indicate?", answers: [{ text: "Element is loading", correct: false }, { text: "Element is clickable/interactive", correct: true }, { text: "Element has error", correct: false }, { text: "Element is disabled", correct: false }] },
+    	{ category: "css", question: "What does text-transform: uppercase do?", answers: [{ text: "Transforms text position", correct: false }, { text: "Converts text to uppercase letters", correct: true }, { text: "Moves text up", correct: false }, { text: "Makes text bold", correct: false }] },
+    	{ category: "css", question: "Which property controls letter spacing?", answers: [{ text: "letter-space", correct: false }, { text: "letter-spacing", correct: true }, { text: "spacing", correct: false }, { text: "char-spacing", correct: false }] },
+    	{ category: "css", question: "What does word-break: break-all do?", answers: [{ text: "Breaks all words", correct: false }, { text: "Allows breaking within words to prevent overflow", correct: true }, { text: "Removes all words", correct: false }, { text: "Adds hyphens", correct: false }] },
+    	{ category: "css", question: "Which property adds shadow to text?", answers: [{ text: "shadow", correct: false }, { text: "text-shadow", correct: true }, { text: "font-shadow", correct: false }, { text: "text-effect", correct: false }] },
+    	{ category: "css", question: "What does white-space: nowrap do?", answers: [{ text: "Removes spaces", correct: false }, { text: "Prevents text from wrapping to new line", correct: true }, { text: "Adds white space", correct: false }, { text: "Makes background white", correct: false }] },
+    	{ category: "css", question: "Which property controls the pointer cursor?", answers: [{ text: "mouse", correct: false }, { text: "cursor", correct: true }, { text: "pointer", correct: false }, { text: "icon", correct: false }] },
+    	{ category: "css", question: "What does object-fit: cover do on images?", answers: [{ text: "Covers entire page", correct: false }, { text: "Scales image to cover container while maintaining aspect ratio", correct: true }, { text: "Adds image cover", correct: false }, { text: "Hides image", correct: false }] },
+    	{ category: "css", question: "Which property creates a gradient background?", answers: [{ text: "background: gradient()", correct: false }, { text: "background: linear-gradient() or radial-gradient()", correct: true }, { text: "gradient: linear()", correct: false }, { text: "background-gradient", correct: false }] },
+    	{ category: "css", question: "What does backdrop-filter do?", answers: [{ text: "Filters background images", correct: false }, { text: "Applies graphical effects to area behind element", correct: true }, { text: "Removes backdrop", correct: false }, { text: "Validates filters", correct: false }] },
+    	{ category: "css", question: "Which property controls how overflowing content scrolls?", answers: [{ text: "scroll-type", correct: false }, { text: "overflow-x and overflow-y", correct: true }, { text: "scrollbar", correct: false }, { text: "flow", correct: false }] },
+    	// ========================================
+    	// MODULE 3: INTEGRATING HTML & CSS (~50 questions)
+    	// Category: integrate
+    	// ========================================
+    	// 3.1 Stylesheets, precedence, and project structure
+    	{ category: "integrate", question: "What is the correct precedence order (lowest to highest)?", answers: [{ text: "Inline > External > Internal", correct: false }, { text: "External > Internal > Inline", correct: false }, { text: "User agent > External/Internal (by order) > Inline", correct: true }, { text: "Internal > External > Inline", correct: false }] },
+    	{ category: "integrate", question: "When is it appropriate to use inline styles?", answers: [{ text: "For all styles", correct: false }, { text: "For one-off overrides, email templates, or dynamic script values", correct: true }, { text: "Never", correct: false }, { text: "Only for colors", correct: false }] },
+    	{ category: "integrate", question: "What is a good practice for organizing project files?", answers: [{ text: "Put everything in root", correct: false }, { text: "Organize into predictable folders like /css, /js, /img, /fonts", correct: true }, { text: "Mix HTML, CSS and JS in same folder", correct: false }, { text: "Use random file names", correct: false }] },
+    	{ category: "integrate", question: "When should you use !important in CSS?", answers: [{ text: "For all important styles", correct: false }, { text: "Only for utilities or accessibility fixes, documented clearly", correct: true }, { text: "To increase specificity easily", correct: false }, { text: "Never", correct: false }] },
+    	{ category: "integrate", question: "How do you properly link an external stylesheet?", answers: [{ text: "<style src='style.css'>", correct: false }, { text: "<link rel='stylesheet' href='style.css'>", correct: true }, { text: "<css href='style.css'>", correct: false }, { text: "<stylesheet>style.css</stylesheet>", correct: false }] },
+    	{ category: "integrate", question: "Where should external stylesheets be linked?", answers: [{ text: "Before </body>", correct: false }, { text: "Inside <head>", correct: true }, { text: "After <body>", correct: false }, { text: "Before <!DOCTYPE>", correct: false }] },
+    	{ category: "integrate", question: "What is the purpose of media='print' on a stylesheet link?", answers: [{ text: "Print the CSS file", correct: false }, { text: "Apply styles only when printing", correct: true }, { text: "Enable printing on page", correct: false }, { text: "Compress CSS", correct: false }] },
+    	{ category: "integrate", question: "Which naming convention helps maintain consistent CSS?", answers: [{ text: "Random names", correct: false }, { text: "BEM (Block Element Modifier)", correct: true }, { text: "ALL_CAPS", correct: false }, { text: "numbers only", correct: false }] },
+    	{ category: "integrate", question: "What should be separated when using build tools?", answers: [{ text: "HTML from CSS", correct: false }, { text: "Source (/src) from build output (/dist)", correct: true }, { text: "Images from fonts", correct: false }, { text: "Dev from production", correct: false }] },
+    	{ category: "integrate", question: "Why prefer external stylesheets over inline styles?", answers: [{ text: "Inline is faster", correct: false }, { text: "External allows caching and maintainability", correct: true }, { text: "External increases specificity", correct: false }, { text: "Inline doesn't work", correct: false }] },
+    	// 3.2 Forms and interactive elements
+    	{ category: "integrate", question: "How do you correctly associate a <label> with an <input>?", answers: [{ text: "Place label before input", correct: false }, { text: "Use 'for' attribute on label matching input's 'id'", correct: true }, { text: "Use 'name' attribute", correct: false }, { text: "No association needed", correct: false }] },
+    	{ category: "integrate", question: "Which HTML5 attribute validates email format?", answers: [{ text: "required", correct: false }, { text: "type='email'", correct: true }, { text: "validate='email'", correct: false }, { text: "pattern", correct: false }] },
+    	{ category: "integrate", question: "Which pseudo-class styles keyboard-focused elements?", answers: [{ text: ":hover", correct: false }, { text: ":active", correct: false }, { text: ":focus", correct: false }, { text: ":focus-visible", correct: true }] },
+    	{ category: "integrate", question: "What CSS property is best for spacing form elements?", answers: [{ text: "margin on each element", correct: false }, { text: "gap in flexbox or grid container", correct: true }, { text: "padding on each element", correct: false }, { text: "multiple <br> tags", correct: false }] },
+    	{ category: "integrate", question: "How do you style invalid form inputs?", answers: [{ text: ".invalid class", correct: false }, { text: ":invalid pseudo-class", correct: true }, { text: "[invalid] attribute selector", correct: false }, { text: "JavaScript only", correct: false }] },
+    	{ category: "integrate", question: "Which CSS property ensures consistent form layout across screens?", answers: [{ text: "Fixed widths", correct: false }, { text: "Flexbox or Grid with responsive units", correct: true }, { text: "Tables", correct: false }, { text: "Absolute positioning", correct: false }] },
+    	{ category: "integrate", question: "What aria attribute links error messages to form fields?", answers: [{ text: "aria-error", correct: false }, { text: "aria-describedby", correct: true }, { text: "aria-invalid", correct: false }, { text: "aria-message", correct: false }] },
+    	{ category: "integrate", question: "How should error messages be announced to screen readers?", answers: [{ text: "Display only", correct: false }, { text: "Use aria-live or role='alert'", correct: true }, { text: "Use console.log", correct: false }, { text: "Hidden text", correct: false }] },
+    	{ category: "integrate", question: "Which button semantic indicates an action (not navigation)?", answers: [{ text: "<a> tag", correct: false }, { text: "<button> element", correct: true }, { text: "<input type='link'>", correct: false }, { text: "<div onclick>", correct: false }] },
+    	{ category: "integrate", question: "What ensures comfortable touch targets on mobile?", answers: [{ text: "Minimum 24×24px", correct: false }, { text: "Minimum 44×44px with adequate spacing", correct: true }, { text: "Maximum 20×20px", correct: false }, { text: "Any size works", correct: false }] },
+    	// 3.3 Standards compliance and debugging
+    	{ category: "integrate", question: "What is the purpose of HTML/CSS validators?", answers: [{ text: "Improve performance", correct: false }, { text: "Detect syntax errors and ensure standards compliance", correct: true }, { text: "Add styles automatically", correct: false }, { text: "Compress code", correct: false }] },
+    	{ category: "integrate", question: "Which browser tool is essential for debugging CSS?", answers: [{ text: "Console", correct: false }, { text: "Elements/Inspector panel to view computed styles", correct: true }, { text: "Network tab", correct: false }, { text: "Sources panel", correct: false }] },
+    	{ category: "integrate", question: "How do you debug specificity issues?", answers: [{ text: "Add more !important", correct: false }, { text: "Inspect computed styles to see winning rule, then adjust selectors", correct: true }, { text: "Reload page", correct: false }, { text: "Change all to IDs", correct: false }] },
+    	{ category: "integrate", question: "What does autoprefixing mean?", answers: [{ text: "Adding comments automatically", correct: false }, { text: "Automatically adding vendor prefixes (-webkit-, -moz-) for compatibility", correct: true }, { text: "Prefixing class names", correct: false }, { text: "Validating CSS", correct: false }] },
+    	{ category: "integrate", question: "Which DevTools feature helps diagnose Grid/Flexbox issues?", answers: [{ text: "Console.log()", correct: false }, { text: "Grid/Flex inspector overlays", correct: true }, { text: "JavaScript alerts", correct: false }, { text: "HTML validator", correct: false }] },
+    	{ category: "integrate", question: "What should you do after fixing CSS in DevTools?", answers: [{ text: "Leave it in browser", correct: false }, { text: "Persist changes to source files and commit", correct: true }, { text: "Take screenshot only", correct: false }, { text: "Nothing", correct: false }] },
+    	{ category: "integrate", question: "How do you test responsive designs?", answers: [{ text: "Desktop only", correct: false }, { text: "Use responsive design mode and test on real devices", correct: true }, { text: "Guess breakpoints", correct: false }, { text: "Don't test", correct: false }] },
+    	{ category: "integrate", question: "What does linting do for CSS?", answers: [{ text: "Compiles CSS", correct: false }, { text: "Analyzes code for errors and style issues", correct: true }, { text: "Minifies CSS", correct: false }, { text: "Adds colors", correct: false }] },
+    	{ category: "integrate", question: "Which approach helps avoid specificity conflicts?", answers: [{ text: "Use only IDs", correct: false }, { text: "Favor class selectors over IDs and reduce nesting depth", correct: true }, { text: "Use !important everywhere", correct: false }, { text: "Inline all styles", correct: false }] },
+    	{ category: "integrate", question: "What is the purpose of CSS source maps?", answers: [{ text: "Create site maps", correct: false }, { text: "Map compiled/minified CSS back to source for debugging", correct: true }, { text: "Show geographic data", correct: false }, { text: "Validate CSS", correct: false }] },
+    	{ category: "integrate", question: "How should stylesheets be ordered?", answers: [{ text: "Random order", correct: false }, { text: "Base → Layout → Components → Utilities", correct: true }, { text: "Alphabetically", correct: false }, { text: "By file size", correct: false }] },
+    	{ category: "integrate", question: "What indicates a well-formed HTML document?", answers: [{ text: "Has colors", correct: false }, { text: "Properly nested tags, closed elements, valid DOCTYPE", correct: true }, { text: "Uses tables", correct: false }, { text: "Has JavaScript", correct: false }] },
+    	{ category: "integrate", question: "Which tool profiles CSS rendering performance?", answers: [{ text: "HTML validator", correct: false }, { text: "Performance/Rendering tab in DevTools", correct: true }, { text: "Console", correct: false }, { text: "Sources panel", correct: false }] },
+    	{ category: "integrate", question: "What does 'progressive enhancement' mean?", answers: [{ text: "Adding features randomly", correct: false }, { text: "Building basic functionality first, then enhancing for modern browsers", correct: true }, { text: "Progressive images only", correct: false }, { text: "Gradual color changes", correct: false }] },
+    	{ category: "integrate", question: "How do you check cross-browser compatibility?", answers: [{ text: "Test in one browser", correct: false }, { text: "Test across different browsers and use feature queries (@supports)", correct: true }, { text: "Assume all browsers same", correct: false }, { text: "Don't check", correct: false }] },
+    	{ category: "integrate", question: "What CSS feature allows conditional styling based on support?", answers: [{ text: "@if", correct: false }, { text: "@supports", correct: true }, { text: "@media", correct: false }, { text: "@check", correct: false }] },
+    	{ category: "integrate", question: "Which layout overlay helps debug positioning?", answers: [{ text: "Grid overlay", correct: false }, { text: "Box Model visualization in DevTools", correct: true }, { text: "Color picker", correct: false }, { text: "Font inspector", correct: false }] },
+    	{ category: "integrate", question: "What indicates good CSS architecture?", answers: [{ text: "Long selectors", correct: false }, { text: "Modular, reusable components with low specificity", correct: true }, { text: "Everything inline", correct: false }, { text: "Single huge file", correct: false }] },
+    	{ category: "integrate", question: "How do you style form validation states without layout shift?", answers: [{ text: "Add/remove elements", correct: false }, { text: "Reserve space for messages and toggle visibility", correct: true }, { text: "Use alerts", correct: false }, { text: "Ignore layout", correct: false }] },
+    	{ category: "integrate", question: "What makes a button accessible?", answers: [{ text: "Large size only", correct: false }, { text: "Semantic <button>, visible focus, keyboard accessible", correct: true }, { text: "Bright colors", correct: false }, { text: "Animations", correct: false }] },
+    	{ category: "integrate", question: "Which CSS methodology prevents naming collisions?", answers: [{ text: "Random names", correct: false }, { text: "BEM or similar naming conventions", correct: true }, { text: "Short names", correct: false }, { text: "Numbers", correct: false }] },
+    	{ category: "integrate", question: "What is the benefit of CSS custom properties over preprocessor variables?", answers: [{ text: "No benefit", correct: false }, { text: "Can be changed dynamically at runtime and cascade", correct: true }, { text: "Compile faster", correct: false }, { text: "Better specificity", correct: false }] },
+    	{ category: "integrate", question: "How do you debug cascade issues?", answers: [{ text: "Guess randomly", correct: false }, { text: "Check computed styles to see which rule wins and why", correct: true }, { text: "Delete all CSS", correct: false }, { text: "Use only inline styles", correct: false }] },
+    	{ category: "integrate", question: "What indicates proper separation of concerns?", answers: [{ text: "CSS in HTML attributes", correct: false }, { text: "HTML for structure, CSS for presentation, JS for behavior", correct: true }, { text: "Everything in JavaScript", correct: false }, { text: "Inline styles everywhere", correct: false }] },
+    	{ category: "integrate", question: "Which practice improves CSS maintainability?", answers: [{ text: "Long selector chains", correct: false }, { text: "Design tokens (CSS variables) and component patterns", correct: true }, { text: "Duplicate code", correct: false }, { text: "No comments", correct: false }] },
+    	{ category: "integrate", question: "How should relative paths be used?", answers: [{ text: "Avoid them", correct: false }, { text: "Consistently (e.g., ../css/style.css) without fragile deep nesting", correct: true }, { text: "Only absolute paths", correct: false }, { text: "Randomly", correct: false }] },
+    	{ category: "integrate", question: "What is the purpose of /src and /dist folders?", answers: [{ text: "Store images", correct: false }, { text: "Separate source code from built/compiled output", correct: true }, { text: "Backup files", correct: false }, { text: "Version control", correct: false }] },
+    	{ category: "integrate", question: "Which file should be the default entry point?", answers: [{ text: "main.html", correct: false }, { text: "index.html", correct: true }, { text: "home.html", correct: false }, { text: "start.html", correct: false }] },
+    	{ category: "integrate", question: "What makes forms keyboard accessible?", answers: [{ text: "Mouse only", correct: false }, { text: "Logical tab order, visible focus indicators, semantic controls", correct: true }, { text: "Touch only", correct: false }, { text: "Voice commands", correct: false }] },
+    	{ category: "integrate", question: "What is the difference between <link> and @import for CSS?", answers: [{ text: "No difference", correct: false }, { text: "<link> loads in parallel (faster); @import loads sequentially", correct: true }, { text: "@import is faster", correct: false }, { text: "<link> is deprecated", correct: false }] },
+    	{ category: "integrate", question: "Where should <script> tags typically be placed?", answers: [{ text: "In <head>", correct: false }, { text: "Before </body> or with defer attribute", correct: true }, { text: "Before <!DOCTYPE>", correct: false }, { text: "Doesn't matter", correct: false }] },
+    	{ category: "integrate", question: "What is the purpose of the noscript element?", answers: [{ text: "Disable scripts", correct: false }, { text: "Provide fallback content when JavaScript is disabled", correct: true }, { text: "Comment out scripts", correct: false }, { text: "Load scripts", correct: false }] },
+    	{ category: "integrate", question: "Which attribute prevents form validation?", answers: [{ text: "nocheck", correct: false }, { text: "novalidate", correct: true }, { text: "skip-validation", correct: false }, { text: "validate='false'", correct: false }] },
+    	{ category: "integrate", question: "What does autocomplete='off' do?", answers: [{ text: "Disables the input", correct: false }, { text: "Prevents browser from auto-filling the field", correct: true }, { text: "Completes text automatically", correct: false }, { text: "Validates input", correct: false }] },
+    	{ category: "integrate", question: "Which CSS selector targets an input when it's focused?", answers: [{ text: "input:active", correct: false }, { text: "input:focus", correct: true }, { text: "input:hover", correct: false }, { text: "input:selected", correct: false }] },
+    	{ category: "integrate", question: "How do you create a CSS-only tooltip?", answers: [{ text: "JavaScript only", correct: false }, { text: "Use ::after pseudo-element with :hover", correct: true }, { text: "Use title attribute", correct: false }, { text: "Use <tooltip> tag", correct: false }] },
+    	{ category: "integrate", question: "What makes a table accessible?", answers: [{ text: "Large text only", correct: false }, { text: "<caption>, <th> with scope, proper structure", correct: true }, { text: "Colors", correct: false }, { text: "Borders", correct: false }] },
+    	// ========================================
+    	// MODULE 4: RESPONSIVE WEB DESIGN (~25 questions)
+    	// Category: responsive
+    	// ========================================
+    	// 4.1 Responsive design fundamentals
+    	{ category: "responsive", question: "What is the best approach for responsive design?", answers: [{ text: "Desktop-first", correct: false }, { text: "Mobile-first", correct: true }, { text: "Tablet-first", correct: false }, { text: "Order doesn't matter", correct: false }] },
+    	{ category: "responsive", question: "How do you make an image responsive with CSS?", answers: [{ text: "width: 100%", correct: false }, { text: "max-width: 100%; height: auto;", correct: true }, { text: "responsive: true;", correct: false }, { text: "flex: 1;", correct: false }] },
+    	{ category: "responsive", question: "Which HTML attribute serves different images for different screen sizes?", answers: [{ text: "src", correct: false }, { text: "srcset", correct: true }, { text: "sources", correct: false }, { text: "media", correct: false }] },
+    	{ category: "responsive", question: "What does a mobile-first media query look like?", answers: [{ text: "@media (max-width: 768px)", correct: false }, { text: "@media (min-width: 768px)", correct: true }, { text: "@media (mobile)", correct: false }, { text: "@media screen", correct: false }] },
+    	{ category: "responsive", question: "Which CSS function is useful for fluid typography?", answers: [{ text: "calc()", correct: false }, { text: "clamp()", correct: true }, { text: "var()", correct: false }, { text: "fluid()", correct: false }] },
+    	{ category: "responsive", question: "What is the purpose of the viewport meta tag?", answers: [{ text: "Show viewport", correct: false }, { text: "Control layout viewport and initial scale on mobile", correct: true }, { text: "Add viewport styles", correct: false }, { text: "Create viewports", correct: false }] },
+    	{ category: "responsive", question: "Which unit creates fluid grids that scale?", answers: [{ text: "px only", correct: false }, { text: "% or fr units", correct: true }, { text: "pt", correct: false }, { text: "cm", correct: false }] },
+    	{ category: "responsive", question: "What CSS property sets aspect ratio?", answers: [{ text: "ratio", correct: false }, { text: "aspect-ratio", correct: true }, { text: "proportion", correct: false }, { text: "width-height", correct: false }] },
+    	{ category: "responsive", question: "Which media feature detects device orientation?", answers: [{ text: "@media (direction)", correct: false }, { text: "@media (orientation: portrait/landscape)", correct: true }, { text: "@media (rotate)", correct: false }, { text: "@media (position)", correct: false }] },
+    	// 4.2 Modern layout systems
+    	{ category: "responsive", question: "When should you use Flexbox vs CSS Grid?", answers: [{ text: "Always use Grid", correct: false }, { text: "Flexbox for one-dimensional layouts; Grid for two-dimensional", correct: true }, { text: "Always use Flexbox", correct: false }, { text: "They're interchangeable", correct: false }] },
+    	{ category: "responsive", question: "Which CSS Grid property creates responsive columns automatically?", answers: [{ text: "grid-template-columns: auto;", correct: false }, { text: "grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));", correct: true }, { text: "grid-auto-columns: responsive;", correct: false }, { text: "grid-columns: flexible;", correct: false }] },
+    	{ category: "responsive", question: "What does auto-fit do in CSS Grid?", answers: [{ text: "Fits content to grid", correct: false }, { text: "Automatically fits as many columns as possible, collapsing empty tracks", correct: true }, { text: "Auto-sizes images", correct: false }, { text: "Validates grid", correct: false }] },
+    	{ category: "responsive", question: "What is the difference between auto-fit and auto-fill?", answers: [{ text: "No difference", correct: false }, { text: "auto-fit collapses empty tracks; auto-fill keeps them", correct: true }, { text: "auto-fill is faster", correct: false }, { text: "auto-fit is deprecated", correct: false }] },
+    	{ category: "responsive", question: "Which Flexbox property controls spacing between items?", answers: [{ text: "spacing", correct: false }, { text: "gap", correct: true }, { text: "margin", correct: false }, { text: "padding", correct: false }] },
+    	{ category: "responsive", question: "What does flex-wrap: wrap do?", answers: [{ text: "Wraps text", correct: false }, { text: "Allows flex items to wrap to new lines", correct: true }, { text: "Wraps containers", correct: false }, { text: "Creates gift wrapping", correct: false }] },
+    	{ category: "responsive", question: "Which Grid property defines row heights?", answers: [{ text: "grid-rows", correct: false }, { text: "grid-template-rows", correct: true }, { text: "row-height", correct: false }, { text: "rows", correct: false }] },
+    	{ category: "responsive", question: "What does justify-content do in Flexbox?", answers: [{ text: "Vertical alignment", correct: false }, { text: "Distributes space along main axis", correct: true }, { text: "Validates content", correct: false }, { text: "Justifies text", correct: false }] },
+    	{ category: "responsive", question: "What does align-items do in Flexbox?", answers: [{ text: "Aligns text", correct: false }, { text: "Aligns items along cross axis", correct: true }, { text: "Creates rows", correct: false }, { text: "Distributes space", correct: false }] },
+    	{ category: "responsive", question: "Which CSS function returns the smaller value?", answers: [{ text: "min()", correct: true }, { text: "small()", correct: false }, { text: "lesser()", correct: false }, { text: "minimum()", correct: false }] },
+    	// 4.3 Performance for responsive experiences
+    	{ category: "responsive", question: "Which technique improves initial page load performance?", answers: [{ text: "Load all images in high-res", correct: false }, { text: "Lazy loading with loading='lazy' and inline critical CSS", correct: true }, { text: "Use only PNG images", correct: false }, { text: "Disable caching", correct: false }] },
+    	{ category: "responsive", question: "Which modern image format provides better compression?", answers: [{ text: "BMP", correct: false }, { text: "WebP or AVIF", correct: true }, { text: "GIF", correct: false }, { text: "TIFF", correct: false }] },
+    	{ category: "responsive", question: "What is the purpose of preconnect?", answers: [{ text: "Connect cables", correct: false }, { text: "Establish early connections to important third-party origins", correct: true }, { text: "Pre-load images", correct: false }, { text: "Validate connections", correct: false }] },
+    	{ category: "responsive", question: "Which metric measures layout stability?", answers: [{ text: "FPS", correct: false }, { text: "CLS (Cumulative Layout Shift)", correct: true }, { text: "TTL", correct: false }, { text: "FCP", correct: false }] },
+    	{ category: "responsive", question: "What does LCP measure?", answers: [{ text: "Load Complete Percentage", correct: false }, { text: "Largest Contentful Paint - loading performance", correct: true }, { text: "Low Content Page", correct: false }, { text: "Link Click Performance", correct: false }] },
+    	{ category: "responsive", question: "How do you prevent layout shift from images?", answers: [{ text: "Don't use images", correct: false }, { text: "Specify width and height attributes", correct: true }, { text: "Use only small images", correct: false }, { text: "Load images last", correct: false }] },
+    	{ category: "responsive", question: "Which CSS property prevents horizontal scrolling?", answers: [{ text: "scroll: none", correct: false }, { text: "overflow-x: hidden", correct: true }, { text: "no-scroll: true", correct: false }, { text: "scrollbar: hidden", correct: false }] },
+    	{ category: "responsive", question: "What does the 'vw' unit represent?", answers: [{ text: "Very wide", correct: false }, { text: "1% of viewport width", correct: true }, { text: "Variable width", correct: false }, { text: "View width", correct: false }] },
+    	{ category: "responsive", question: "What does the 'vh' unit represent?", answers: [{ text: "Very high", correct: false }, { text: "1% of viewport height", correct: true }, { text: "Variable height", correct: false }, { text: "View height", correct: false }] },
+    	{ category: "responsive", question: "Which CSS property prevents text from getting too wide?", answers: [{ text: "width: 100%", correct: false }, { text: "max-width: 60ch or similar", correct: true }, { text: "text-width", correct: false }, { text: "wrap: true", correct: false }] },
+    	{ category: "responsive", question: "What does flex-shrink control?", answers: [{ text: "Element size", correct: false }, { text: "How much a flex item can shrink relative to others", correct: true }, { text: "Font shrinking", correct: false }, { text: "Container shrinking", correct: false }] },
+    	{ category: "responsive", question: "What does flex-grow control?", answers: [{ text: "Element size", correct: false }, { text: "How much a flex item can grow relative to others", correct: true }, { text: "Font growing", correct: false }, { text: "Container growing", correct: false }] },
+    	{ category: "responsive", question: "Which Grid function automatically sizes tracks?", answers: [{ text: "auto", correct: false }, { text: "minmax()", correct: true }, { text: "size()", correct: false }, { text: "track()", correct: false }] },
+    	// ========================================
+    	// MODULE 5: ACCESSIBILITY, USABILITY & BEST PRACTICES (~30 questions)
+    	// Category: accessibility
+    	// ========================================
+    	// 5.1 Accessibility and usability
+    	{ category: "accessibility", question: "What is the minimum color contrast ratio for normal text (WCAG AA)?", answers: [{ text: "3:1", correct: false }, { text: "4.5:1", correct: true }, { text: "7:1", correct: false }, { text: "2:1", correct: false }] },
+    	{ category: "accessibility", question: "Which semantic landmarks improve screen reader navigation?", answers: [{ text: "<div> and <span>", correct: false }, { text: "<main>, <nav>, <header>, <footer>, <aside>", correct: true }, { text: "<section> only", correct: false }, { text: "<article> only", correct: false }] },
+    	{ category: "accessibility", question: "How do you hide content visually but keep it for screen readers?", answers: [{ text: "display: none;", correct: false }, { text: "visibility: hidden;", correct: false }, { text: "position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;", correct: true }, { text: "opacity: 0;", correct: false }] },
+    	{ category: "accessibility", question: "What is the purpose of skip links?", answers: [{ text: "Skip pages", correct: false }, { text: "Allow keyboard users to bypass repetitive navigation", correct: true }, { text: "Skip loading", correct: false }, { text: "Skip images", correct: false }] },
+    	{ category: "accessibility", question: "Which attribute describes form field errors?", answers: [{ text: "aria-error", correct: false }, { text: "aria-describedby", correct: true }, { text: "aria-message", correct: false }, { text: "error-text", correct: false }] },
+    	{ category: "accessibility", question: "What does aria-live do?", answers: [{ text: "Creates live video", correct: false }, { text: "Announces dynamic content changes to screen readers", correct: true }, { text: "Makes content animated", correct: false }, { text: "Tests if user is active", correct: false }] },
+    	{ category: "accessibility", question: "Which media query respects user motion preferences?", answers: [{ text: "@media (prefers-reduced-motion)", correct: true }, { text: "@media (no-animation)", correct: false }, { text: "@media (motion-off)", correct: false }, { text: "@media (static)", correct: false }] },
+    	{ category: "accessibility", question: "What makes a focus indicator visible?", answers: [{ text: "High contrast outline or ring", correct: true }, { text: "Transparent border", correct: false }, { text: "outline: none;", correct: false }, { text: "Hidden focus", correct: false }] },
+    	{ category: "accessibility", question: "Which ARIA role announces important messages?", answers: [{ text: "role='message'", correct: false }, { text: "role='alert'", correct: true }, { text: "role='notice'", correct: false }, { text: "role='important'", correct: false }] },
+    	{ category: "accessibility", question: "What is keyboard trap and why avoid it?", answers: [{ text: "A design pattern", correct: false }, { text: "When keyboard focus gets stuck, preventing navigation - major accessibility barrier", correct: true }, { text: "A CSS property", correct: false }, { text: "A security feature", correct: false }] },
+    	{ category: "accessibility", question: "Which heading structure is proper?", answers: [{ text: "h1 > h3 > h2", correct: false }, { text: "h1 > h2 > h3", correct: true }, { text: "h3 > h2 > h1", correct: false }, { text: "All h1", correct: false }] },
+    	{ category: "accessibility", question: "What is the purpose of alt text on images?", answers: [{ text: "SEO only", correct: false }, { text: "Provide text alternative for users who cannot see images", correct: true }, { text: "Image captions", correct: false }, { text: "Decoration", correct: false }] },
+    	{ category: "accessibility", question: "When should alt='' (empty alt) be used?", answers: [{ text: "Never", correct: false }, { text: "For decorative images that convey no information", correct: true }, { text: "For all images", correct: false }, { text: "When lazy", correct: false }] },
+    	{ category: "accessibility", question: "What makes navigation predictable?", answers: [{ text: "Random menu order", correct: false }, { text: "Consistent layout, clear labels, logical structure", correct: true }, { text: "Hidden menus", correct: false }, { text: "Hover-only navigation", correct: false }] },
+    	{ category: "accessibility", question: "Which practice improves form usability?", answers: [{ text: "Placeholder as label", correct: false }, { text: "Clear labels, error messages near fields, logical tab order", correct: true }, { text: "Hidden required fields", correct: false }, { text: "Submit on every keystroke", correct: false }] },
+    	// 5.2 Best practices and quality assurance
+    	{ category: "accessibility", question: "What does 'separation of concerns' mean?", answers: [{ text: "Separate files by size", correct: false }, { text: "Keep HTML (structure), CSS (presentation), and JS (behavior) separate", correct: true }, { text: "Separate developers", correct: false }, { text: "Alphabetical organization", correct: false }] },
+    	{ category: "accessibility", question: "Which naming convention prevents CSS collisions?", answers: [{ text: "Random names", correct: false }, { text: "BEM (Block Element Modifier)", correct: true }, { text: "Short names", correct: false }, { text: "Numbers only", correct: false }] },
+    	{ category: "accessibility", question: "What are design tokens?", answers: [{ text: "Security tokens", correct: false }, { text: "Centralized design values (colors, spacing) often as CSS custom properties", correct: true }, { text: "Authentication keys", correct: false }, { text: "Payment tokens", correct: false }] },
+    	{ category: "accessibility", question: "What is progressive enhancement?", answers: [{ text: "Adding features randomly", correct: false }, { text: "Building core functionality first, then enhancing for capable browsers", correct: true }, { text: "Progressive images only", correct: false }, { text: "Gradual transitions", correct: false }] },
+    	{ category: "accessibility", question: "How do you test cross-browser compatibility?", answers: [{ text: "Test in one browser", correct: false }, { text: "Test across multiple browsers and use @supports for fallbacks", correct: true }, { text: "Assume all browsers are same", correct: false }, { text: "Don't test", correct: false }] },
+    	{ category: "accessibility", question: "What is a performance budget?", answers: [{ text: "Project cost limit", correct: false }, { text: "Set limits on file sizes and metrics to maintain speed", correct: true }, { text: "CPU usage limit", correct: false }, { text: "Memory limit", correct: false }] },
+    	{ category: "accessibility", question: "Which metric measures interactivity responsiveness?", answers: [{ text: "FPS", correct: false }, { text: "INP (Interaction to Next Paint)", correct: true }, { text: "LCP", correct: false }, { text: "TTI", correct: false }] },
+    	{ category: "accessibility", question: "What does FCP measure?", answers: [{ text: "File Compression Percentage", correct: false }, { text: "First Contentful Paint - when first content renders", correct: true }, { text: "Full Content Parsed", correct: false }, { text: "Frame Count Per-second", correct: false }] },
+    	{ category: "accessibility", question: "Which practice improves code maintainability?", answers: [{ text: "No comments", correct: false }, { text: "Clear naming, modular structure, documentation, version control", correct: true }, { text: "Long variable names", correct: false }, { text: "Duplicate code", correct: false }] },
+    	// 5.3 SEO and analytics
+    	{ category: "accessibility", question: "Which elements are most important for SEO?", answers: [{ text: "Divs and spans", correct: false }, { text: "<title>, <meta name='description'>, headings, and image alt text", correct: true }, { text: "Only title", correct: false }, { text: "Color schemes", correct: false }] },
+    	{ category: "accessibility", question: "What is a KPI in web analytics?", answers: [{ text: "Key Performance Indicator - metric reflecting business goals", correct: true }, { text: "Keyword Performance Index", correct: false }, { text: "A cookie type", correct: false }, { text: "SEO tool", correct: false }] },
+    	{ category: "accessibility", question: "What is the purpose of a sitemap?", answers: [{ text: "Show site map to users", correct: false }, { text: "Help search engines discover and index pages", correct: true }, { text: "Create site layout", correct: false }, { text: "Analytics tracking", correct: false }] },
+    	{ category: "accessibility", question: "What does canonical URL prevent?", answers: [{ text: "Hacking", correct: false }, { text: "Duplicate content issues in search engines", correct: true }, { text: "404 errors", correct: false }, { text: "Slow loading", correct: false }] },
+    	{ category: "accessibility", question: "Which meta tag tells search engines not to index a page?", answers: [{ text: "<meta name='noindex'>", correct: false }, { text: "<meta name='robots' content='noindex'>", correct: true }, { text: "<meta name='search' content='false'>", correct: false }, { text: "<meta hidden='true'>", correct: false }] },
+    	{ category: "accessibility", question: "What is structured data (Schema.org)?", answers: [{ text: "Organized folders", correct: false }, { text: "Markup that helps search engines understand content context", correct: true }, { text: "Database structure", correct: false }, { text: "File organization", correct: false }] },
+    	{ category: "accessibility", question: "What is the purpose of tabindex='0'?", answers: [{ text: "Removes from tab order", correct: false }, { text: "Makes element keyboard focusable in natural order", correct: true }, { text: "Sets first tab", correct: false }, { text: "Disables tabbing", correct: false }] },
+    	{ category: "accessibility", question: "What does tabindex='-1' do?", answers: [{ text: "Makes element first in tab order", correct: false }, { text: "Removes from tab order but allows programmatic focus", correct: true }, { text: "Reverses tab order", correct: false }, { text: "Validates tabs", correct: false }] },
+    	{ category: "accessibility", question: "Which attribute announces button state to screen readers?", answers: [{ text: "aria-state", correct: false }, { text: "aria-pressed or aria-expanded", correct: true }, { text: "state", correct: false }, { text: "button-state", correct: false }] },
+    	{ category: "accessibility", question: "What does aria-hidden='true' do?", answers: [{ text: "Hides element visually", correct: false }, { text: "Hides element from assistive technologies", correct: true }, { text: "Hides element completely", correct: false }, { text: "Makes element transparent", correct: false }] },
+    	{ category: "accessibility", question: "Which practice improves readability?", answers: [{ text: "Small text", correct: false }, { text: "Adequate line-height (1.5+), line-length (60-70ch), contrast", correct: true }, { text: "All caps", correct: false }, { text: "Justified text", correct: false }] },
+    	{ category: "accessibility", question: "What is WCAG?", answers: [{ text: "Web Content Accessibility Guidelines", correct: true }, { text: "Website Color and Graphics", correct: false }, { text: "Web Coding and Grammar", correct: false }, { text: "Worldwide Content Association", correct: false }] },
+    	{ category: "accessibility", question: "Which WCAG level is legally required in many jurisdictions?", answers: [{ text: "A", correct: false }, { text: "AA", correct: true }, { text: "AAA", correct: false }, { text: "B", correct: false }] },
+    	{ category: "accessibility", question: "What makes video content accessible?", answers: [{ text: "High resolution only", correct: false }, { text: "Captions, transcripts, audio descriptions", correct: true }, { text: "Autoplay", correct: false }, { text: "Large player", correct: false }] },
+    	{ category: "accessibility", question: "Which heading level comes after h3?", answers: [{ text: "h5", correct: false }, { text: "h4", correct: true }, { text: "h2", correct: false }, { text: "h6", correct: false }] },
+    	{ category: "accessibility", question: "What is the purpose of lang attribute on elements?", answers: [{ text: "Set programming language", correct: false }, { text: "Indicate natural language for correct pronunciation by screen readers", correct: true }, { text: "Language translation", correct: false }, { text: "Spell check", correct: false }] }
     ]; // end allQuestions
 
+    const shuffledQuestions = generateExam(allQuestions, EXAM_DISTRIBUTION);
 
     function startQuiz() {
         startScreen.classList.add('hidden');
         quizScreen.classList.remove('hidden');
         
-        shuffledQuestions = allQuestions.sort(() => Math.random() - 0.5).slice(0, TOTAL_QUESTIONS);
+        // shuffledQuestions = allQuestions.sort(() => Math.random() - 0.5).slice(0, TOTAL_QUESTIONS);
         currentQuestionIndex = 0;
         score = 0;
         
@@ -2025,31 +424,56 @@ document.addEventListener('DOMContentLoaded', () => {
             showResults();
         }
     }
+    
+    function shuffleAnswers(question) {
+        question.answers = question.answers
+            .map(a => ({ ...a }))
+            .sort(() => Math.random() - 0.5);
+        return question;
+    }
 
     function showQuestion(question) {
-        // Set the question text
-        questionTextElement.innerText = question.question;
+        // // Set the question text
+        // questionTextElement.innerText = question.question;
 
-        // 🔀 Shuffle answers so the correct one isn't always in the same position
-        const shuffledAnswers = question.answers
-            .map(a => ({ ...a })) // shallow copy
-            .sort(() => Math.random() - 0.5);
+        // // 🔀 Shuffle answers so the correct one isn't always in the same position
+        // const shuffledAnswers = question.answers
+        //     .map(a => ({ ...a })) // shallow copy
+        //     .sort(() => Math.random() - 0.5);
 
-        // Add fade-in animation class
+        // // Add fade-in animation class
+        // questionContainer.classList.remove('fade-in'); // reset if applied before
+        // void questionContainer.offsetWidth; // trick to reflow and restart animation
+        // questionContainer.classList.add('fade-in');
+
+        // // Create answer buttons dynamically
+        // shuffledAnswers.forEach(answer => {
+        //     const button = document.createElement('button');
+        //     button.innerText = answer.text;
+        //     button.classList.add('btn', 'fade-in'); // each answer fades in too
+        //     if (answer.correct) {
+        //         button.dataset.correct = answer.correct;
+        //     }
+        //     button.addEventListener('click', selectAnswer);
+        //     answerButtonsElement.appendChild(button);
+        // });
+        
+        const mixed = shuffleAnswers(question);
+
+        questionTextElement.innerText = mixed.question;
         questionContainer.classList.remove('fade-in'); // reset if applied before
         void questionContainer.offsetWidth; // trick to reflow and restart animation
         questionContainer.classList.add('fade-in');
 
-        // Create answer buttons dynamically
-        shuffledAnswers.forEach(answer => {
-            const button = document.createElement('button');
-            button.innerText = answer.text;
-            button.classList.add('btn', 'fade-in'); // each answer fades in too
-            if (answer.correct) {
-                button.dataset.correct = answer.correct;
-            }
-            button.addEventListener('click', selectAnswer);
-            answerButtonsElement.appendChild(button);
+        mixed.answers.forEach(answer => {
+            const btn = document.createElement("button");
+            btn.innerText = answer.text;
+            btn.classList.add('btn', 'fade-in');
+    
+            if (answer.correct) btn.dataset.correct = true;
+    
+            btn.addEventListener("click", selectAnswer);
+            answerButtonsElement.appendChild(btn);
         });
     }
 
